@@ -14,6 +14,9 @@ rm -f /etc/ssh/ssh_host_*
 # Remove root SSH artifacts from packer build.
 rm -rf /root/.ssh /root/.cache
 
+# Lock root password set during build.
+passwd -l root
+
 # Remove shell history from build.
 rm -f /root/.bash_history /root/.nano_history
 history -c 2>/dev/null || true
