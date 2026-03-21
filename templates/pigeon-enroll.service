@@ -1,0 +1,15 @@
+[Unit]
+Description=pigeon-enroll secret enrollment server
+After=network-online.target
+Wants=network-online.target
+Before=pigeon-template.service
+ConditionPathExists=/encrypted/pigeon/enrollment-key
+ConditionPathExists=/encrypted/pigeon/enroll.json
+
+[Service]
+ExecStart=/opt/pigeon/bin/pigeon-enroll server -config=/encrypted/pigeon/enroll.json
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

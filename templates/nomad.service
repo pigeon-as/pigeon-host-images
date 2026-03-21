@@ -1,0 +1,22 @@
+[Unit]
+Description=Nomad
+Documentation=https://developer.hashicorp.com/nomad
+Wants=network-online.target pigeon-mesh.service
+After=network-online.target pigeon-mesh.service consul.service
+ConditionFileNotEmpty=/encrypted/nomad/nomad.hcl
+
+[Service]
+Type=notify
+ExecStart=/usr/bin/nomad agent -config /encrypted/nomad
+ExecReload=/bin/kill -HUP $MAINPID
+KillMode=process
+KillSignal=SIGINT
+LimitNOFILE=65536
+LimitNPROC=infinity
+Restart=on-failure
+RestartSec=5
+TasksMax=infinity
+OOMScoreAdjust=-1000
+
+[Install]
+WantedBy=multi-user.target

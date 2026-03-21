@@ -1,0 +1,49 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Install QEMU
+        run: sudo apt-get update && sudo apt-get install -y qemu-system-x86 qemu-utils
+
+      - name: Install Packer
+        uses: hashicorp/setup-packer@main
+
+      - name: Packer init
+        run: make init
+
+      - name: Build control-plane image
+        run: make build-control-plane
+
+      - name: Build worker image
+        run: make build-worker
+
+      - name: Generate checksums
+        run: |
+          cd output
+          sha256sum control-plane/control-plane.qcow2 worker/worker.qcow2 > SHA256SUMS
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            output/control-plane/control-plane.qcow2
+            output/worker/worker.qcow2
+            output/SHA256SUMS
