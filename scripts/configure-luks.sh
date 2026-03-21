@@ -1,4 +1,4 @@
-#!/bin/bash -ex
+#!/bin/bash -e
 set -o pipefail
 # First-boot LUKS setup for /encrypted partition.
 #
@@ -37,6 +37,12 @@ fi
 if [ -z "$DEVICE" ]; then
   echo "ERROR: Cannot find device for /encrypted"
   exit 1
+fi
+
+# Already mounted from decrypted mapping — treat as configured.
+if [ "$DEVICE" = "/dev/mapper/encrypted" ]; then
+  echo "INFO: /encrypted is already mounted from /dev/mapper/encrypted — skipping setup"
+  exit 0
 fi
 
 # If already LUKS, skip setup.
