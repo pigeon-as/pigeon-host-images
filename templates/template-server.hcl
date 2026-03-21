@@ -67,6 +67,7 @@ template {
     EOT
   destination = "/encrypted/consul/consul.hcl"
   perms       = "0640"
+  command     = "chown consul:consul /encrypted/consul/consul.hcl"
 }
 
 # --- Vault ---
@@ -79,10 +80,10 @@ template {
     ui = true
 
     listener "tcp" {
-      address         = \"0.0.0.0:8200\"
-      tls_cert_file   = \"/encrypted/tls/server.crt\"
-      tls_key_file    = \"/encrypted/tls/server.key\"
-      tls_min_version = \"tls12\"
+      address         = "0.0.0.0:8200"
+      tls_cert_file   = "/encrypted/tls/server.crt"
+      tls_key_file    = "/encrypted/tls/server.key"
+      tls_min_version = "tls12"
     }
 
     storage "consul" {
@@ -103,6 +104,7 @@ template {
     EOT
   destination = "/encrypted/vault/vault.hcl"
   perms       = "0640"
+  command     = "chown vault:vault /encrypted/vault/vault.hcl"
 }
 
 # --- Nomad (server + client) ---
