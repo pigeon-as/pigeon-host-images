@@ -1,4 +1,4 @@
-#!/bin/bash -ex
+#!/bin/bash -e
 set -o pipefail
 # Swap cloud kernel for generic bare metal kernel.
 
