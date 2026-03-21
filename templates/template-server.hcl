@@ -67,7 +67,8 @@ template {
     EOT
   destination = "/encrypted/consul/consul.hcl"
   perms       = "0640"
-  command     = "chown consul:consul /encrypted/consul/consul.hcl"
+  user        = "consul"
+  group       = "consul"
 }
 
 # --- Vault ---
@@ -104,7 +105,8 @@ template {
     EOT
   destination = "/encrypted/vault/vault.hcl"
   perms       = "0640"
-  command     = "chown vault:vault /encrypted/vault/vault.hcl"
+  user        = "vault"
+  group       = "vault"
 }
 
 # --- Nomad (server + client) ---

@@ -64,6 +64,8 @@ template {
     EOT
   destination = "/encrypted/consul/consul.hcl"
   perms       = "0640"
+  user        = "consul"
+  group       = "consul"
 }
 
 # --- Nomad (client only) ---
