@@ -123,13 +123,13 @@ build {
   }
 
   provisioner "file" {
-    source      = "templates/sshd-hardening.conf"
-    destination = "/etc/ssh/sshd_config.d/99-pigeon.conf"
+    source      = "templates/sshd.conf"
+    destination = "/etc/ssh/sshd_config.d/99-sshd.conf"
   }
 
   provisioner "file" {
-    source      = "templates/blacklist-pigeon.conf"
-    destination = "/etc/modprobe.d/blacklist-pigeon.conf"
+    source      = "templates/blacklist.conf"
+    destination = "/etc/modprobe.d/blacklist.conf"
   }
 
   # First-boot LUKS setup script (called by Terraform SSH provisioner).
