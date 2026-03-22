@@ -124,7 +124,7 @@ build {
 
   provisioner "file" {
     source      = "templates/sshd.conf"
-    destination = "/etc/ssh/sshd_config.d/99-sshd.conf"
+    destination = "/etc/ssh/sshd_config.d/99-pigeon.conf"
   }
 
   provisioner "file" {
