@@ -1,20 +1,14 @@
 #!/bin/bash -ex
 set -o pipefail
-# OVH BYOLinux: make_image_bootable.sh
-# Runs chrooted into the deployed filesystem after OVH rsyncs the image.
 # Adapted from https://github.com/ovh/bringyourownlinux/blob/master/make_image_bootable.sh
 
 export DEBIAN_FRONTEND=noninteractive
 
-# Regenerate mdadm.conf if software RAID is present.
 if [ -f /usr/share/mdadm/mkconf ]; then
-  # The image ships /etc/mdadm/mdadm.conf from the build environment.
-  # Delete the stale copy and regenerate from live RAID state.
-  rm -f /etc/mdadm.conf
+  rm -f /etc/mdadm/mdadm.conf /etc/mdadm.conf
   /usr/share/mdadm/mkconf force-generate
 fi
 
-# Get serial console parameters from the rescue system's cmdline.
 console_parameters="$(grep -Po '\bconsole=\S+' /proc/cmdline | paste -s -d' ')" || true
 if [ -n "$console_parameters" ] && [ -f /etc/default/grub ]; then
   if ! grep '^GRUB_CMDLINE_LINUX="' /etc/default/grub | grep -qF "$console_parameters"; then
@@ -22,13 +16,11 @@ if [ -n "$console_parameters" ] && [ -f /etc/default/grub ]; then
   fi
 fi
 
-# Install ZFS packages if ZFS is in use.
 if lsblk -lno FSTYPE 2>/dev/null | grep -qxiF zfs_member; then
   apt-get -y install linux-headers-generic zfs-dkms zfs-initramfs zfs-zed
   systemctl enable zfs-import-scan.service
 fi
 
-# Install GRUB — UEFI or legacy, based on firmware type.
 if [ -d /sys/firmware/efi ]; then
   echo "INFO: Installing GRUB for UEFI boot"
   apt-get -y install --no-install-recommends grub-efi-amd64
@@ -57,11 +49,6 @@ fi
 apt-get -y autoremove
 apt-get -y clean
 
-# Generate unique machine-id for this server.
 systemd-machine-id-setup
-
-# Update initramfs (includes mdadm.conf, ZFS modules if present).
 update-initramfs -u
-
-# Cleanup.
 rm -rf /root/.ovh/

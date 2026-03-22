@@ -1,11 +1,3 @@
-# pigeon-template config for control-plane servers.
-#
-# Source: /encrypted/pigeon/secrets.json (written by pigeon-enroll on startup)
-# Renders: mesh.json, consul.hcl, vault.hcl, nomad.hcl
-#
-# Secret values that must be JSON arrays (not comma-separated):
-#   mesh_seeds, consul_retry_join
-
 source "secrets" "file" {
   path = "/encrypted/pigeon/secrets.json"
 }

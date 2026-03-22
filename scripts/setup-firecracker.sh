@@ -1,6 +1,5 @@
 #!/bin/bash -ex
 set -o pipefail
-# Install Firecracker and jailer binaries.
 
 ARCH=$(uname -m)
 

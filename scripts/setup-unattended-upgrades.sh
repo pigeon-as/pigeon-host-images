@@ -1,5 +1,4 @@
 #!/bin/bash -ex
-# Enable unattended security updates.
 
 export DEBIAN_FRONTEND=noninteractive
 

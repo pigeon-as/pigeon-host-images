@@ -1,5 +1,4 @@
 #!/bin/bash -ex
-# Install pigeon-template binary.
 
 ARCH=$([ "$(uname -m)" = aarch64 ] && echo arm64 || echo amd64)
 

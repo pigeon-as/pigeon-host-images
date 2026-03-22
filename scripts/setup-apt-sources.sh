@@ -1,5 +1,4 @@
 #!/bin/bash -ex
-# Add HashiCorp apt repository.
 
 apt-get install -y wget gpg
 

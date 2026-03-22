@@ -1,5 +1,4 @@
 #!/bin/bash -ex
-# Install Vault via HashiCorp apt repo.
 
 apt-get install -y "vault=${VAULT_VERSION}"
 systemctl enable vault

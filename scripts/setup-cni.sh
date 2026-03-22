@@ -1,6 +1,5 @@
 #!/bin/bash -ex
 set -o pipefail
-# Install CNI plugins.
 
 ARCH=$([ "$(uname -m)" = aarch64 ] && echo arm64 || echo amd64)
 

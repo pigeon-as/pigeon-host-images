@@ -1,5 +1,4 @@
 #!/bin/bash -ex
-# Install nomad-plugin-lvm.
 
 ARCH=$([ "$(uname -m)" = aarch64 ] && echo arm64 || echo amd64)
 

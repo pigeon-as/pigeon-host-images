@@ -1,5 +1,4 @@
 #!/bin/bash -ex
-# Install Consul via HashiCorp apt repo.
 
 apt-get install -y "consul=${CONSUL_VERSION}"
 systemctl enable consul

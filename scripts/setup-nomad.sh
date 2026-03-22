@@ -1,5 +1,4 @@
 #!/bin/bash -ex
-# Install Nomad via HashiCorp apt repo.
 
 apt-get install -y "nomad=${NOMAD_VERSION}"
 mkdir -p /opt/nomad/plugins

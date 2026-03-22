@@ -1,11 +1,3 @@
-# pigeon-template config for worker nodes.
-#
-# Source: /encrypted/pigeon/secrets.json (written by pigeon-enroll --claim at boot)
-# Renders: mesh.json, consul.hcl, nomad.hcl
-#
-# Secret values that must be JSON arrays (not comma-separated):
-#   mesh_seeds, consul_retry_join, nomad_servers
-
 source "secrets" "file" {
   path = "/encrypted/pigeon/secrets.json"
 }
