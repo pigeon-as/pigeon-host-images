@@ -26,9 +26,6 @@ jobs:
       - name: Install Packer
         uses: hashicorp/setup-packer@v3
 
-      - name: Packer init
-        run: make init
-
       - name: Build control-plane image
         run: make build-control-plane
 
