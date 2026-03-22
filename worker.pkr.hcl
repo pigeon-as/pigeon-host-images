@@ -37,12 +37,10 @@ source "qemu" "worker" {
 build {
   sources = ["source.qemu.worker"]
 
-  # Bare metal kernel + GRUB.
   provisioner "shell" {
     script = "scripts/setup-kernel.sh"
   }
 
-  # Install tools.
   provisioner "shell" {
     scripts = [
       "scripts/setup-apt-sources.sh",
@@ -74,7 +72,6 @@ build {
     ]
   }
 
-  # Configs.
   provisioner "file" {
     source      = "templates/pigeon-mesh.service"
     destination = "/etc/systemd/system/pigeon-mesh.service"
@@ -130,13 +127,11 @@ build {
     destination = "/etc/modprobe.d/99-pigeon-kvm.conf"
   }
 
-  # First-boot LUKS setup script (called by ConfigDrive user_data).
   provisioner "file" {
     source      = "scripts/configure-luks.sh"
     destination = "/usr/local/bin/configure-luks.sh"
   }
 
-  # Enable pigeon services (after service files are deployed).
   provisioner "shell" {
     inline = [
       "systemctl enable pigeon-mesh",
@@ -144,12 +139,10 @@ build {
     ]
   }
 
-  # Hugepages mount for Firecracker VMs.
   provisioner "shell" {
     script = "scripts/setup-hugepages.sh"
   }
 
-  # OVH boot hook.
   provisioner "shell" {
     script = "scripts/setup-ovh.sh"
   }
@@ -159,7 +152,6 @@ build {
     destination = "/root/.ovh/make_image_bootable.sh"
   }
 
-  # Cleanup.
   provisioner "shell" {
     script = "scripts/cleanup.sh"
   }
