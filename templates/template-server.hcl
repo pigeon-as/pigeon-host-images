@@ -1,4 +1,4 @@
-source "secrets" "file" {
+source "file" "secrets" {
   path = "/encrypted/pigeon/secrets.json"
 }
 
