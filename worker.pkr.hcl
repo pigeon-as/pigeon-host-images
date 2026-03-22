@@ -122,12 +122,12 @@ build {
 
   provisioner "file" {
     source      = "templates/blacklist.conf"
-    destination = "/etc/modprobe.d/blacklist.conf"
+    destination = "/etc/modprobe.d/99-pigeon-blacklist.conf"
   }
 
   provisioner "file" {
     source      = "templates/kvm.conf"
-    destination = "/etc/modprobe.d/kvm.conf"
+    destination = "/etc/modprobe.d/99-pigeon-kvm.conf"
   }
 
   # First-boot LUKS setup script (called by ConfigDrive user_data).

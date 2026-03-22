@@ -37,6 +37,6 @@ chmod +x /etc/grub.d/42_password
 sed -i 's/--class os/--class os --unrestricted/' /etc/grub.d/10_linux
 update-grub
 
-sed -Ei '/^ - (grub-dpkg|growpart|resizefs)/d' /etc/cloud/cloud.cfg
+sed -Ei '/^\s*-\s*(grub-dpkg|growpart|resizefs)/d' /etc/cloud/cloud.cfg
 
 apt-get -y dist-upgrade
