@@ -61,31 +61,7 @@ PASSPHRASE=""
 mkfs.ext4 -L encrypted /dev/mapper/encrypted
 mount /dev/mapper/encrypted /encrypted
 
-# --- Step 5: Create service directories ---
-mkdir -p /encrypted/consul/data
-mkdir -p /encrypted/vault/data
-mkdir -p /encrypted/nomad/data
-mkdir -p /encrypted/pigeon
-
-chown consul:consul /encrypted/consul /encrypted/consul/data 2>/dev/null || true
-chown vault:vault /encrypted/vault /encrypted/vault/data 2>/dev/null || true
-
-# --- Step 5b: Self-signed TLS cert ---
-mkdir -p /encrypted/tls
-if [ ! -f /encrypted/tls/server.key ]; then
-  HOSTNAME=$(hostname)
-  openssl req -x509 -newkey ec -pkeyopt ec_paramgen_curve:P-256 \
-    -keyout /encrypted/tls/server.key \
-    -out /encrypted/tls/server.crt \
-    -days 3650 -nodes \
-    -subj "/CN=${HOSTNAME}" \
-    -addext "subjectAltName=DNS:${HOSTNAME},DNS:localhost,IP:127.0.0.1"
-  chmod 640 /encrypted/tls/server.key /encrypted/tls/server.crt
-  chown root:vault /encrypted/tls/server.key 2>/dev/null || true
-  echo "INFO: Generated self-signed TLS cert for ${HOSTNAME}"
-fi
-
-# --- Step 6: /etc/crypttab ---
+# --- Step 5: /etc/crypttab ---
 sed -i '\|/encrypted|d' /etc/fstab
 
 DEVICE_ID=$(find /dev/disk/by-id/ -lname "*/${DEVICE##*/}" | grep -v wwn- | head -1)
@@ -94,7 +70,7 @@ DEVICE_REF="${DEVICE_ID:-$DEVICE}"
 echo "encrypted $DEVICE_REF - tpm2-device=auto" >> /etc/crypttab
 echo "/dev/mapper/encrypted /encrypted ext4 defaults 0 2" >> /etc/fstab
 
-# --- Step 7: Update initramfs ---
+# --- Step 6: Update initramfs ---
 update-initramfs -u
 
 echo "INFO: /encrypted LUKS setup complete"
