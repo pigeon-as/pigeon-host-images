@@ -108,7 +108,7 @@ build {
   }
 
   provisioner "file" {
-    source      = "templates/nftables-server.conf"
+    source      = "templates/nftables.conf"
     destination = "/etc/nftables.conf"
   }
 
