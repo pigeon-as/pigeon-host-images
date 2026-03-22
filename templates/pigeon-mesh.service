@@ -1,0 +1,13 @@
+[Unit]
+Description=pigeon-mesh WireGuard overlay
+After=network-online.target
+Wants=network-online.target
+ConditionPathExists=/encrypted/pigeon/mesh.json
+
+[Service]
+ExecStart=/opt/pigeon/bin/pigeon-mesh --config=/encrypted/pigeon/mesh.json
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

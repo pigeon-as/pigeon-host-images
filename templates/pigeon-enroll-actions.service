@@ -1,0 +1,14 @@
+[Unit]
+Description=pigeon-enroll post-claim actions (vault-init, luks-recovery, etc.)
+After=vault.service
+Requires=vault.service
+ConditionPathExists=!/encrypted/vault/init.json
+ConditionFileNotEmpty=/encrypted/pigeon/enroll.json
+
+[Service]
+Type=oneshot
+ExecStart=/opt/pigeon/bin/pigeon-enroll run-actions -config=/encrypted/pigeon/enroll.json
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
