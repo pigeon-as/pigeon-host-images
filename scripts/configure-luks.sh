@@ -1,7 +1,5 @@
 #!/bin/bash -e
 set -o pipefail
-# First-boot LUKS setup for /encrypted partition.
-# Requires TPM2 — aborts if /dev/tpm0 is missing.
 
 if [ ! -c /dev/tpm0 ]; then
   echo "ERROR: No TPM2 device at /dev/tpm0 — aborting"
@@ -35,17 +33,14 @@ if cryptsetup isLuks "$DEVICE" 2>/dev/null; then
   exit 0
 fi
 
-# --- Step 1: Unmount placeholder ext4 ---
 umount /encrypted 2>/dev/null || true
 
-# --- Step 2: LUKS2 format with temporary passphrase ---
 PASSPHRASE=$(head -c 32 /dev/urandom | base64)
 
 echo -n "$PASSPHRASE" | cryptsetup luksFormat --type luks2 \
   --pbkdf argon2id \
   --batch-mode "$DEVICE" -
 
-# --- Step 3: Open + enroll TPM2 + remove passphrase ---
 echo -n "$PASSPHRASE" | cryptsetup open --type luks2 "$DEVICE" encrypted -
 
 echo "INFO: Enrolling TPM2 with PCR 7"
@@ -55,13 +50,10 @@ echo -n "$PASSPHRASE" | systemd-cryptenroll \
   "$DEVICE"
 
 echo -n "$PASSPHRASE" | cryptsetup luksRemoveKey "$DEVICE" -
-PASSPHRASE=""
 
-# --- Step 4: Create filesystem + mount ---
 mkfs.ext4 -L encrypted /dev/mapper/encrypted
 mount /dev/mapper/encrypted /encrypted
 
-# --- Step 5: /etc/crypttab ---
 sed -i '\|/encrypted|d' /etc/fstab
 
 DEVICE_ID=$(find /dev/disk/by-id/ -lname "*/${DEVICE##*/}" | grep -v wwn- | head -1)
@@ -70,7 +62,4 @@ DEVICE_REF="${DEVICE_ID:-$DEVICE}"
 echo "encrypted $DEVICE_REF - tpm2-device=auto" >> /etc/crypttab
 echo "/dev/mapper/encrypted /encrypted ext4 defaults 0 2" >> /etc/fstab
 
-# --- Step 6: Update initramfs ---
 update-initramfs -u
-
-echo "INFO: /encrypted LUKS setup complete"
