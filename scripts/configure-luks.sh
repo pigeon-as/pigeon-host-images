@@ -43,7 +43,6 @@ echo -n "$PASSPHRASE" | cryptsetup luksFormat --type luks2 \
 
 echo -n "$PASSPHRASE" | cryptsetup open --type luks2 "$DEVICE" encrypted -
 
-echo "INFO: Enrolling TPM2 with PCR 7"
 echo -n "$PASSPHRASE" | systemd-cryptenroll \
   --tpm2-device=auto \
   --tpm2-pcrs=7 \
