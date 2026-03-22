@@ -9,7 +9,7 @@ Two images: **[control-plane.qcow2](control-plane.pkr.hcl)** and **[worker.qcow2
 ```bash
 make build      # Build both images
 make validate   # Packer validate only
-make clean      # Remove output/
+make clean      # Remove build/
 ```
 
 Requires: `packer`, `qemu-system-x86`, `qemu-utils`.

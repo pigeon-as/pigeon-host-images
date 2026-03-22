@@ -22,7 +22,7 @@ source "qemu" "control-plane" {
   ssh_timeout  = "10m"
 
   shutdown_command = "shutdown -P now"
-  output_directory = "output/control-plane"
+  output_directory = "build/control-plane"
   vm_name          = "control-plane.qcow2"
 
   cd_files = ["cloud-init/user-data", "cloud-init/meta-data"]

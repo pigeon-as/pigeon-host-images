@@ -22,7 +22,7 @@ source "qemu" "worker" {
   ssh_timeout  = "10m"
 
   shutdown_command = "shutdown -P now"
-  output_directory = "output/worker"
+  output_directory = "build/worker"
   vm_name          = "worker.qcow2"
 
   cd_files = ["cloud-init/user-data", "cloud-init/meta-data"]

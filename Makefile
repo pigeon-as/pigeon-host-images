@@ -17,4 +17,4 @@ validate: init
 	packer validate worker.pkr.hcl
 
 clean:
-	rm -rf output/
+	rm -rf build/
