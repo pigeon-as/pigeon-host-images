@@ -1,5 +1,5 @@
-#!/bin/bash -ex
-set -o pipefail
+#!/bin/bash
+set -exo pipefail
 # Adapted from https://github.com/ovh/bringyourownlinux/blob/master/make_image_bootable.sh
 
 export DEBIAN_FRONTEND=noninteractive

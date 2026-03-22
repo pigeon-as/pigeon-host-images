@@ -1,5 +1,5 @@
-#!/bin/bash -ex
-set -o pipefail
+#!/bin/bash
+set -exo pipefail
 
 ARCH=$(uname -m)
 

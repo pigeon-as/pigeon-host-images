@@ -1,4 +1,5 @@
-#!/bin/bash -ex
+#!/bin/bash
+set -ex
 
 apt-get install -y "consul=${CONSUL_VERSION}"
 systemctl enable consul

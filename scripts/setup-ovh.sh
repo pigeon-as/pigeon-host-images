@@ -1,3 +1,4 @@
-#!/bin/bash -ex
+#!/bin/bash
+set -ex
 
 mkdir -p /root/.ovh

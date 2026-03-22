@@ -1,5 +1,5 @@
-#!/bin/bash -e
-set -o pipefail
+#!/bin/bash
+set -eo pipefail
 
 if [ ! -c /dev/tpm0 ]; then
   echo "ERROR: No TPM2 device at /dev/tpm0 — aborting"

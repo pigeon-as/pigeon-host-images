@@ -1,4 +1,5 @@
-#!/bin/bash -ex
+#!/bin/bash
+set -ex
 
 apt-get install -y "vault=${VAULT_VERSION}"
 systemctl enable vault

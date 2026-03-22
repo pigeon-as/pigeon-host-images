@@ -1,4 +1,5 @@
-#!/bin/bash -ex
+#!/bin/bash
+set -ex
 
 apt-get install -y "nomad=${NOMAD_VERSION}"
 mkdir -p /opt/nomad/plugins
