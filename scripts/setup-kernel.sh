@@ -1,9 +1,9 @@
 #!/bin/bash
-set -ex
+set -eo pipefail
 
 export DEBIAN_FRONTEND=noninteractive
 
-# Remove cloud GRUB settings (replaced by templates/grub-pigeon.cfg drop-in)
+# Remove cloud GRUB settings (replaced by 50-pigeon.cfg drop-in)
 rm -f /etc/default/grub.d/50-cloudimg-settings.cfg
 apt-get update
 
