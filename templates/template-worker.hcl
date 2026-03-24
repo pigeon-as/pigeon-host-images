@@ -114,7 +114,7 @@ template {
 
 template {
   destination = "/encrypted/pigeon/fence.d/ovh.hcl"
-  perms       = "0644"
+  perms       = "0600"
   contents = <<-EOT
     {{ $d := .secrets | parseJSON -}}
     {{ $v := index $d "vars" -}}
