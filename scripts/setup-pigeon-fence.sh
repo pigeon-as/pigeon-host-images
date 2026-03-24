@@ -8,5 +8,5 @@ mkdir -p /opt/pigeon/bin /etc/pigeon
 
 echo "Installing pigeon-fence ${VERSION} (${ARCH})..."
 curl -fsSL -o /opt/pigeon/bin/pigeon-fence \
-  "https://github.com/pigeon-as/pigeon-fence/releases/download/${VERSION}/pigeon-fence-linux-${ARCH}"
+  "https://github.com/pigeon-as/pigeon-fence/releases/download/v${VERSION}/pigeon-fence-linux-${ARCH}"
 chmod 0755 /opt/pigeon/bin/pigeon-fence
