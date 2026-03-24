@@ -3,6 +3,7 @@ set -ex
 
 apt-get install -y wget gpg
 
+# HashiCorp apt repository (Vault, Consul, Nomad)
 wget -O- https://apt.releases.hashicorp.com/gpg | \
   gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
 

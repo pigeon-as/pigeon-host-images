@@ -1,26 +1,24 @@
 #!/bin/bash
 set -exo pipefail
-# Adapted from https://github.com/ovh/bringyourownlinux/blob/master/make_image_bootable.sh
+# OVH BYOLinux post-deploy hook — runs chrooted on the target server.
+# Ref: https://help.ovhcloud.com/csm/en-gb-dedicated-servers-bring-your-own-linux?id=kb_article_view&sysparm_article=KB0061612
 
 export DEBIAN_FRONTEND=noninteractive
 
+# Regenerate mdadm.conf for the server's RAID layout
 if [ -f /usr/share/mdadm/mkconf ]; then
   rm -f /etc/mdadm/mdadm.conf /etc/mdadm.conf
   /usr/share/mdadm/mkconf force-generate
 fi
 
+# Append serial console parameters from the OVH rescue environment
 console_parameters="$(grep -Po '\bconsole=\S+' /proc/cmdline | paste -s -d' ')" || true
-if [ -n "$console_parameters" ] && [ -f /etc/default/grub ]; then
-  if ! grep '^GRUB_CMDLINE_LINUX="' /etc/default/grub | grep -qF "$console_parameters"; then
-    sed -Ei "s/(^GRUB_CMDLINE_LINUX=.*)\"\$/\1 $console_parameters\"/" /etc/default/grub
-  fi
+if [ -n "$console_parameters" ]; then
+  echo "GRUB_CMDLINE_LINUX=\"\$GRUB_CMDLINE_LINUX $console_parameters\"" \
+    > /etc/default/grub.d/99-serial-console.cfg
 fi
 
-if lsblk -lno FSTYPE 2>/dev/null | grep -qxiF zfs_member; then
-  apt-get -y install linux-headers-generic zfs-dkms zfs-initramfs zfs-zed
-  systemctl enable zfs-import-scan.service
-fi
-
+# Install GRUB for the server's boot mode
 if [ -d /sys/firmware/efi ]; then
   echo "INFO: Installing GRUB for UEFI boot"
   apt-get -y install --no-install-recommends grub-efi-amd64
@@ -28,13 +26,8 @@ if [ -d /sys/firmware/efi ]; then
   apt-get -y purge grub-pc-bin 2>/dev/null || true
 else
   echo "INFO: Installing GRUB for legacy boot"
-  read -r bootDevice bootDeviceType < <(findmnt -A -c -e -l -n -T /boot/ -o SOURCE,FSTYPE)
-  if [[ "$bootDeviceType" == "zfs" ]]; then
-    bootDevices="$(zpool status -LP "${bootDevice%/*}" | grep -Po '/dev/\S+')"
-  else
-    bootDevices="$bootDevice"
-  fi
-  realBootDevices="$(lsblk -n -p -b -l -o TYPE,NAME "$bootDevices" -s | awk '$1 == "disk" && !seen[$2]++ {print $2}')"
+  read -r bootDevice _ < <(findmnt -A -c -e -l -n -T /boot/ -o SOURCE,FSTYPE)
+  realBootDevices="$(lsblk -n -p -b -l -o TYPE,NAME "$bootDevice" -s | awk '$1 == "disk" && !seen[$2]++ {print $2}')"
   realBootDevicesById=()
   for realBootDevice in $realBootDevices; do
     # shellcheck disable=SC2207

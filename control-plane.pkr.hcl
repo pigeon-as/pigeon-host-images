@@ -37,6 +37,11 @@ source "qemu" "control-plane" {
 build {
   sources = ["source.qemu.control-plane"]
 
+  provisioner "file" {
+    source      = "templates/grub.cfg"
+    destination = "/etc/default/grub.d/50-pigeon.cfg"
+  }
+
   provisioner "shell" {
     script = "scripts/setup-kernel.sh"
   }
@@ -49,15 +54,17 @@ build {
       "scripts/setup-pigeon-mesh.sh",
       "scripts/setup-pigeon-enroll.sh",
       "scripts/setup-pigeon-template.sh",
+      "scripts/setup-pigeon-fence.sh",
       "scripts/setup-vault.sh",
       "scripts/setup-consul.sh",
       "scripts/setup-nomad.sh",
       "scripts/setup-unattended-upgrades.sh",
     ]
     environment_vars = [
-      "PIGEON_MESH_VERSION=0.1.0",
-      "PIGEON_ENROLL_VERSION=0.1.0",
-      "PIGEON_TEMPLATE_VERSION=0.1.0",
+      "PIGEON_MESH_VERSION=0.0.1-beta.1",
+      "PIGEON_ENROLL_VERSION=0.0.1-beta.1",
+      "PIGEON_TEMPLATE_VERSION=0.0.1-beta.1",
+      "PIGEON_FENCE_VERSION=0.0.1-beta.1",
       "VAULT_VERSION=1.19.0-1",
       "CONSUL_VERSION=1.20.6-1",
       "NOMAD_VERSION=1.11.2-1",
@@ -80,8 +87,18 @@ build {
   }
 
   provisioner "file" {
+    source      = "templates/pigeon-fence.service"
+    destination = "/etc/systemd/system/pigeon-fence.service"
+  }
+
+  provisioner "file" {
     source      = "templates/template-server.hcl"
     destination = "/etc/pigeon/template.hcl"
+  }
+
+  provisioner "file" {
+    source      = "templates/fence-server.hcl"
+    destination = "/etc/pigeon/fence.hcl"
   }
 
   provisioner "file" {
@@ -137,6 +154,7 @@ build {
   provisioner "shell" {
     inline = [
       "systemctl enable pigeon-mesh",
+      "systemctl enable pigeon-fence",
       "systemctl enable pigeon-enroll",
       "systemctl enable pigeon-template",
       "systemctl enable pigeon-enroll-actions",
