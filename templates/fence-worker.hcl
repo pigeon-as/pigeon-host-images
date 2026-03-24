@@ -185,8 +185,9 @@ rule "allow_forward_to_wg0" {
 rule "allow_forward_vm_egress" {
   provider  = provider.nftables
   direction = "forward"
+  source    = ["100.64.0.0/10"]
   action    = "accept"
-  comment   = "VM internet egress"
+  comment   = "VM internet egress (CGNAT)"
 }
 
 interval  = "60s"
