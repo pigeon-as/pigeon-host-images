@@ -7,9 +7,14 @@ packer {
   }
 }
 
+variable "ubuntu_version" {
+  type    = string
+  default = "24.04"
+}
+
 source "qemu" "worker" {
-  iso_url      = "https://cloud-images.ubuntu.com/releases/24.04/release/ubuntu-24.04-server-cloudimg-amd64.img"
-  iso_checksum = "file:https://cloud-images.ubuntu.com/releases/24.04/release/SHA256SUMS"
+  iso_url      = "https://cloud-images.ubuntu.com/releases/${var.ubuntu_version}/release/ubuntu-${var.ubuntu_version}-server-cloudimg-amd64.img"
+  iso_checksum = "file:https://cloud-images.ubuntu.com/releases/${var.ubuntu_version}/release/SHA256SUMS"
 
   disk_image       = true
   disk_size        = "5G"
