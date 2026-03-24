@@ -63,7 +63,7 @@ mount /dev/mapper/encrypted /encrypted
 sed -i '\|/encrypted|d' /etc/fstab
 
 # Prefer stable by-id path for crypttab
-DEVICE_ID=$(find /dev/disk/by-id/ -lname "*/${DEVICE##*/}" | grep -v wwn- | head -1)
+DEVICE_ID=$(find /dev/disk/by-id/ -lname "*/${DEVICE##*/}" | grep -v wwn- | head -1 || true)
 DEVICE_REF="${DEVICE_ID:-$DEVICE}"
 
 echo "encrypted $DEVICE_REF - tpm2-device=auto" >> /etc/crypttab
