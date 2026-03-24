@@ -1,8 +1,8 @@
 #!/bin/bash
 set -ex
 
-apt-get install -y "nomad=${NOMAD_VERSION}"
+VERSION="${NOMAD_VERSION:?must set a version}"
+
+apt-get install -y "nomad=${VERSION}"
 mkdir -p /opt/nomad/plugins
 systemctl enable nomad
-
-echo 'export NOMAD_ADDR="http://127.0.0.1:4646"' >> /etc/profile.d/pigeon.sh

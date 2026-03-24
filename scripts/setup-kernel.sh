@@ -3,13 +3,14 @@ set -eo pipefail
 
 export DEBIAN_FRONTEND=noninteractive
 
-# Remove cloud GRUB settings
+# Remove cloud GRUB settings (replaced by 50-pigeon.cfg drop-in)
 rm -f /etc/default/grub.d/50-cloudimg-settings.cfg
 apt-get update
+
 # Replace cloud kernel with generic
 apt-get purge -y linux-virtual 'linux-image-*' 'linux-headers-*'
-
 apt-get install -y linux-image-generic linux-headers-generic
+
 # Bare metal packages
 apt-get install -y mdadm lvm2 amd64-microcode intel-microcode curl jq
 
@@ -17,16 +18,9 @@ apt-get install -y mdadm lvm2 amd64-microcode intel-microcode curl jq
 # runs chrooted without network and picks the right one.
 apt-get install -y --download-only grub-efi-amd64 || true
 apt-get install -y --download-only grub-pc || true
-# Prevent GRUB EFI from writing NVRAM during image build
 echo "grub-efi-amd64 grub2/update_nvram boolean false" | debconf-set-selections
 
-# Hardened boot parameters
-sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT=.*/GRUB_CMDLINE_LINUX_DEFAULT=""/' /etc/default/grub
-sed -i 's/^GRUB_CMDLINE_LINUX=.*/GRUB_CMDLINE_LINUX="nomodeset iommu=pt nosmt=force init_on_alloc=1 slab_nomerge vsyscall=none lockdown=integrity"/' /etc/default/grub
-# Text-only console
-grep -q '^GRUB_GFXPAYLOAD_LINUX=' /etc/default/grub || \
-  echo 'GRUB_GFXPAYLOAD_LINUX="text"' >> /etc/default/grub
-
+# Boot parameters are set via /etc/default/grub.d/50-pigeon.cfg (file provisioner)
 update-grub
 
 # GRUB password — prevent boot parameter editing at physical console

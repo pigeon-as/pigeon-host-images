@@ -1,8 +1,11 @@
 #!/bin/bash
 set -ex
 
-apt-get install -y "vault=${VAULT_VERSION}"
+VERSION="${VAULT_VERSION:?must set a version}"
+
+apt-get install -y "vault=${VERSION}"
 systemctl enable vault
 
+# Shell env for interactive sessions
 echo 'export VAULT_ADDR="https://127.0.0.1:8200"' >> /etc/profile.d/pigeon.sh
 echo 'export VAULT_SKIP_VERIFY=1' >> /etc/profile.d/pigeon.sh

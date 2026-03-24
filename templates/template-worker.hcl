@@ -2,9 +2,9 @@ source "file" "secrets" {
   path = "/encrypted/pigeon/secrets.json"
 }
 
-# --- pigeon-mesh ---
-
 template {
+  destination = "/encrypted/pigeon/mesh.json"
+  perms       = "0600"
   contents = <<-EOT
     {{ $d := .secrets | parseJSON -}}
     {{ $s := index $d "secrets" -}}
@@ -13,16 +13,17 @@ template {
       "seeds": {{ index $v "mesh_seeds" }},
       "gossip_key": "{{ index $s "gossip_key" }}",
       "wg_psk": "{{ index $s "wg_psk" }}",
+      "endpoint_interface": "eth0",
       "egress_cidr": "{{ index $v "egress_cidr" }}"
     }
     EOT
-  destination = "/encrypted/pigeon/mesh.json"
-  perms       = "0600"
 }
 
-# --- Consul (client mode) ---
-
 template {
+  destination = "/encrypted/consul/consul.hcl"
+  perms       = "0640"
+  user        = "consul"
+  group       = "consul"
   contents = <<-EOT
     {{ $d := .secrets | parseJSON -}}
     {{ $s := index $d "secrets" -}}
@@ -54,15 +55,11 @@ template {
       https = -1
     }
     EOT
-  destination = "/encrypted/consul/consul.hcl"
-  perms       = "0640"
-  user        = "consul"
-  group       = "consul"
 }
 
-# --- Nomad (client only) ---
-
 template {
+  destination = "/encrypted/nomad/nomad.hcl"
+  perms       = "0640"
   contents = <<-EOT
     {{ $d := .secrets | parseJSON -}}
     {{ $s := index $d "secrets" -}}
@@ -113,8 +110,53 @@ template {
       enabled = true
     }
     EOT
-  destination = "/encrypted/nomad/nomad.hcl"
-  perms       = "0640"
+}
+
+template {
+  destination = "/encrypted/pigeon/fence.d/ovh.hcl"
+  perms       = "0600"
+  contents = <<-EOT
+    {{ $d := .secrets | parseJSON -}}
+    {{ $v := index $d "vars" -}}
+    provider "ovh" {
+      endpoint           = "ovh-eu"
+      application_key    = "{{ index $v "ovh_application_key" }}"
+      application_secret = "{{ index $v "ovh_application_secret" }}"
+      consumer_key       = "{{ index $v "ovh_consumer_key" }}"
+    }
+
+    data "ovh_ips" "servers" {}
+
+    rule "allow_wireguard_inbound" {
+      provider  = provider.nftables
+      direction = "inbound"
+      protocol  = "udp"
+      dst_port  = ["51820"]
+      source    = [data.ovh_ips.servers]
+      action    = "accept"
+      comment   = "WireGuard tunnel (fleet only)"
+    }
+
+    rule "allow_memberlist_tcp_inbound" {
+      provider  = provider.nftables
+      direction = "inbound"
+      protocol  = "tcp"
+      dst_port  = ["7946"]
+      source    = [data.ovh_ips.servers]
+      action    = "accept"
+      comment   = "Memberlist gossip (fleet only)"
+    }
+
+    rule "allow_memberlist_udp_inbound" {
+      provider  = provider.nftables
+      direction = "inbound"
+      protocol  = "udp"
+      dst_port  = ["7946"]
+      source    = [data.ovh_ips.servers]
+      action    = "accept"
+      comment   = "Memberlist gossip (fleet only)"
+    }
+    EOT
 }
 
 wait {

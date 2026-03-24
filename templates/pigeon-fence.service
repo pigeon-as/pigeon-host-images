@@ -1,0 +1,12 @@
+[Unit]
+Description=pigeon-fence firewall manager
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+ExecStart=/opt/pigeon/bin/pigeon-fence --config=/etc/pigeon/fence.hcl --config=/encrypted/pigeon/fence.d
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
