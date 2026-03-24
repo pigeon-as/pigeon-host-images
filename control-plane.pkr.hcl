@@ -43,7 +43,7 @@ build {
   sources = ["source.qemu.control-plane"]
 
   provisioner "file" {
-    source      = "templates/grub.cfg"
+    source      = "templates/grub-defaults.cfg"
     destination = "/etc/default/grub.d/50-pigeon.cfg"
   }
 

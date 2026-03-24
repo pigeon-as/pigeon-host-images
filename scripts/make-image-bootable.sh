@@ -11,13 +11,6 @@ if [ -f /usr/share/mdadm/mkconf ]; then
   /usr/share/mdadm/mkconf force-generate
 fi
 
-# Append serial console parameters from the OVH rescue environment
-console_parameters="$(grep -Po '\bconsole=\S+' /proc/cmdline | paste -s -d' ')" || true
-if [ -n "$console_parameters" ]; then
-  echo "GRUB_CMDLINE_LINUX=\"\$GRUB_CMDLINE_LINUX $console_parameters\"" \
-    > /etc/default/grub.d/99-serial-console.cfg
-fi
-
 # Install GRUB for the server's boot mode
 if [ -d /sys/firmware/efi ]; then
   echo "INFO: Installing GRUB for UEFI boot"
