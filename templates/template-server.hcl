@@ -211,7 +211,7 @@ template {
   destination = "/etc/pigeon/worker-userdata.sh"
   perms       = "0600"
   contents = <<-EOT
-    #!/bin/bash -ex
+    #!/bin/bash
     {{ $d := .secrets | parseJSON -}}
     {{ $v := index $d "vars" -}}
     export ENROLL_URL="{{ index $v "enroll_url" }}"

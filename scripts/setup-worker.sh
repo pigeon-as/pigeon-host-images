@@ -1,4 +1,5 @@
-#!/bin/bash -ex
+#!/bin/bash
+set -eu
 # Worker first-boot: LUKS setup + secret enrollment via ConfigDrive user_data.
 
 if [ -z "$ENROLL_URL" ] || [ -z "$ENROLL_TOKEN" ]; then

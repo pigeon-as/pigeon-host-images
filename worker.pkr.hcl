@@ -56,6 +56,7 @@ build {
       "scripts/setup-apt-sources.sh",
       "scripts/setup-encryption.sh",
       "scripts/setup-nftables.sh",
+      "scripts/setup-pigeon.sh",
       "scripts/setup-pigeon-mesh.sh",
       "scripts/setup-pigeon-enroll.sh",
       "scripts/setup-pigeon-template.sh",
