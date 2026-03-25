@@ -2,6 +2,11 @@ source "file" "secrets" {
   path = "/encrypted/pigeon/secrets.json"
 }
 
+source "exec" "enroll_token" {
+  command  = "pigeon-enroll generate-token -config=/encrypted/pigeon/enroll.json"
+  interval = "10m"
+}
+
 template {
   destination = "/encrypted/pigeon/mesh.json"
   perms       = "0600"
@@ -199,6 +204,19 @@ template {
       action    = "accept"
       comment   = "Memberlist gossip (fleet only)"
     }
+    EOT
+}
+
+template {
+  destination = "/etc/pigeon/worker-userdata.sh"
+  perms       = "0600"
+  contents = <<-EOT
+    #!/bin/bash -ex
+    {{ $d := .secrets | parseJSON -}}
+    {{ $v := index $d "vars" -}}
+    export ENROLL_URL="{{ index $v "enroll_url" }}"
+    export ENROLL_TOKEN="{{ .enroll_token }}"
+    exec /usr/local/bin/setup-worker.sh
     EOT
 }
 
