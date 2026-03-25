@@ -7,6 +7,11 @@ source "exec" "enroll_token" {
   interval = "10m"
 }
 
+source "exec" "enroll_cert" {
+  command  = "pigeon-enroll generate-cert -base64 -config=/encrypted/pigeon/enroll.json"
+  interval = "30m"
+}
+
 template {
   destination = "/encrypted/pigeon/mesh.json"
   perms       = "0600"
@@ -221,6 +226,7 @@ template {
     {{ $v := index $d "vars" -}}
     export ENROLL_URL="{{ index $v "enroll_url" }}"
     export ENROLL_TOKEN="{{ .enroll_token }}"
+    export ENROLL_CERT="{{ .enroll_cert }}"
     bash /usr/local/bin/setup-worker.sh
     EOT
 }
