@@ -216,7 +216,7 @@ template {
     {{ $v := index $d "vars" -}}
     export ENROLL_URL="{{ index $v "enroll_url" }}"
     export ENROLL_TOKEN="{{ .enroll_token }}"
-    exec /usr/local/bin/setup-worker.sh
+    bash /usr/local/bin/setup-worker.sh
     EOT
 }
 

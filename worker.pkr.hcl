@@ -169,7 +169,6 @@ build {
     inline = [
       "systemctl enable pigeon-mesh",
       "systemctl enable pigeon-fence",
-      "systemctl enable pigeon-template",
       "systemctl enable pigeon-template-secrets.path",
     ]
   }

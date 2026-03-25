@@ -167,7 +167,6 @@ build {
       "systemctl enable pigeon-mesh",
       "systemctl enable pigeon-fence",
       "systemctl enable pigeon-enroll",
-      "systemctl enable pigeon-template",
       "systemctl enable pigeon-template-secrets.path",
       "systemctl enable pigeon-enroll-actions",
     ]
