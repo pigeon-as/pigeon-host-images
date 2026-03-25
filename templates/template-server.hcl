@@ -10,6 +10,7 @@ source "exec" "enroll_token" {
 template {
   destination = "/encrypted/pigeon/mesh.json"
   perms       = "0600"
+  command     = "systemctl reload-or-restart pigeon-mesh"
   contents = <<-EOT
     {{ $d := .secrets | parseJSON -}}
     {{ $s := index $d "secrets" -}}
@@ -29,6 +30,7 @@ template {
   perms       = "0640"
   user        = "consul"
   group       = "consul"
+  command     = "systemctl reload-or-restart consul"
   contents = <<-EOT
     {{ $d := .secrets | parseJSON -}}
     {{ $s := index $d "secrets" -}}
@@ -70,6 +72,7 @@ template {
   perms       = "0640"
   user        = "vault"
   group       = "vault"
+  command     = "systemctl reload-or-restart vault"
   contents = <<-EOT
     {{ $d := .secrets | parseJSON -}}
     {{ $s := index $d "secrets" -}}
@@ -104,6 +107,7 @@ template {
 template {
   destination = "/encrypted/nomad/nomad.hcl"
   perms       = "0640"
+  command     = "systemctl reload-or-restart nomad"
   contents = <<-EOT
     {{ $d := .secrets | parseJSON -}}
     {{ $s := index $d "secrets" -}}
@@ -163,6 +167,7 @@ template {
 template {
   destination = "/encrypted/pigeon/fence.d/ovh.hcl"
   perms       = "0600"
+  command     = "systemctl reload-or-restart pigeon-fence"
   contents = <<-EOT
     {{ $d := .secrets | parseJSON -}}
     {{ $v := index $d "vars" -}}
