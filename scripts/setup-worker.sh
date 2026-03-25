@@ -12,5 +12,3 @@ pigeon-enroll claim \
   -token "$ENROLL_TOKEN" \
   -scope worker \
   -output /encrypted/pigeon/secrets.json
-
-systemctl start pigeon-template.service
