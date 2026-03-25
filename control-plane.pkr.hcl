@@ -56,6 +56,7 @@ build {
       "scripts/setup-apt-sources.sh",
       "scripts/setup-encryption.sh",
       "scripts/setup-nftables.sh",
+      "scripts/setup-pigeon.sh",
       "scripts/setup-pigeon-mesh.sh",
       "scripts/setup-pigeon-enroll.sh",
       "scripts/setup-pigeon-template.sh",
@@ -89,6 +90,11 @@ build {
   provisioner "file" {
     source      = "templates/pigeon-template.service"
     destination = "/etc/systemd/system/pigeon-template.service"
+  }
+
+  provisioner "file" {
+    source      = "templates/pigeon-template-secrets.path"
+    destination = "/etc/systemd/system/pigeon-template-secrets.path"
   }
 
   provisioner "file" {
@@ -161,7 +167,7 @@ build {
       "systemctl enable pigeon-mesh",
       "systemctl enable pigeon-fence",
       "systemctl enable pigeon-enroll",
-      "systemctl enable pigeon-template",
+      "systemctl enable pigeon-template-secrets.path",
       "systemctl enable pigeon-enroll-actions",
     ]
   }
