@@ -2,10 +2,8 @@
 set -eu
 # Worker first-boot: LUKS setup + secret enrollment via ConfigDrive user_data.
 
-if [ -z "$ENROLL_URL" ] || [ -z "$ENROLL_TOKEN" ]; then
-  echo "ERROR: ENROLL_URL and ENROLL_TOKEN must be set"
-  exit 1
-fi
+: "${ENROLL_URL:?missing ENROLL_URL}"
+: "${ENROLL_TOKEN:?missing ENROLL_TOKEN}"
 
 bash /usr/local/bin/configure-luks.sh
 
@@ -14,3 +12,5 @@ pigeon-enroll claim \
   -token "$ENROLL_TOKEN" \
   -scope worker \
   -output /encrypted/pigeon/secrets.json
+
+systemctl start pigeon-template.service
