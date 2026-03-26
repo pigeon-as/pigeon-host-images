@@ -186,8 +186,6 @@ build {
     inline = [
       "systemctl enable pigeon-mesh",
       "systemctl enable pigeon-fence",
-      "systemctl enable consul",
-      "systemctl enable nomad",
     ]
   }
 

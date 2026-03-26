@@ -6,6 +6,10 @@ ENROLL_URL="${file.secrets.vars.enroll_url}"
 ENROLL_TOKEN="${exec.enroll_token}"
 ENROLL_CERT="${exec.enroll_cert}"
 
+: "${ENROLL_URL:?missing ENROLL_URL}"
+: "${ENROLL_TOKEN:?missing ENROLL_TOKEN}"
+: "${ENROLL_CERT:?missing ENROLL_CERT}"
+
 bash /usr/local/bin/configure-luks.sh
 
 # Write client cert bundle to temp file for mTLS claim.
