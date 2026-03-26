@@ -24,3 +24,6 @@ pigeon-enroll claim \
 pigeon-enroll render \
   -config /etc/pigeon/render.hcl \
   -vars /encrypted/pigeon/secrets.json
+
+# Start services that were waiting for rendered configs.
+systemctl start pigeon-mesh consul nomad

@@ -26,6 +26,8 @@ template {
   source      = "/etc/pigeon/templates/consul.hcl.tpl"
   destination = "/encrypted/consul/consul.hcl"
   perms       = "0640"
+  user        = "consul"
+  group       = "consul"
 }
 
 template {
