@@ -59,7 +59,6 @@ build {
       "scripts/setup-pigeon.sh",
       "scripts/setup-pigeon-mesh.sh",
       "scripts/setup-pigeon-enroll.sh",
-      "scripts/setup-pigeon-template.sh",
       "scripts/setup-pigeon-fence.sh",
       "scripts/setup-consul.sh",
       "scripts/setup-nomad.sh",
@@ -74,7 +73,6 @@ build {
     environment_vars = [
       "PIGEON_MESH_VERSION=0.0.1-beta.1",
       "PIGEON_ENROLL_VERSION=0.0.1-beta.1",
-      "PIGEON_TEMPLATE_VERSION=0.0.1-beta.1",
       "PIGEON_FENCE_VERSION=0.0.1-beta.1",
       "CONSUL_VERSION=1.20.6-1",
       "NOMAD_VERSION=1.11.2-1",
@@ -91,23 +89,47 @@ build {
   }
 
   provisioner "file" {
-    source      = "templates/pigeon-template.service"
-    destination = "/etc/systemd/system/pigeon-template.service"
-  }
-
-  provisioner "file" {
-    source      = "templates/pigeon-template-secrets.path"
-    destination = "/etc/systemd/system/pigeon-template-secrets.path"
-  }
-
-  provisioner "file" {
     source      = "templates/pigeon-fence.service"
     destination = "/etc/systemd/system/pigeon-fence.service"
   }
 
+  provisioner "shell" {
+    inline = ["mkdir -p /etc/pigeon/templates"]
+  }
+
   provisioner "file" {
-    source      = "templates/template-worker.hcl"
-    destination = "/etc/pigeon/template.hcl"
+    source      = "templates/mesh-ca.crt.tpl"
+    destination = "/etc/pigeon/templates/mesh-ca.crt.tpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/mesh-ca.key.tpl"
+    destination = "/etc/pigeon/templates/mesh-ca.key.tpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/mesh.json.tpl"
+    destination = "/etc/pigeon/templates/mesh.json.tpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/fence-ovh.hcl.tpl"
+    destination = "/etc/pigeon/templates/fence-ovh.hcl.tpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/consul.hcl.tpl"
+    destination = "/etc/pigeon/templates/consul.hcl.tpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/nomad.hcl.tpl"
+    destination = "/etc/pigeon/templates/nomad.hcl.tpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/render.hcl"
+    destination = "/etc/pigeon/render.hcl"
   }
 
   provisioner "file" {
@@ -160,16 +182,10 @@ build {
     destination = "/usr/local/bin/configure-luks.sh"
   }
 
-  provisioner "file" {
-    source      = "scripts/setup-worker.sh"
-    destination = "/usr/local/bin/setup-worker.sh"
-  }
-
   provisioner "shell" {
     inline = [
       "systemctl enable pigeon-mesh",
       "systemctl enable pigeon-fence",
-      "systemctl enable pigeon-template-secrets.path",
     ]
   }
 

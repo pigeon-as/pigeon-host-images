@@ -2,12 +2,13 @@
 Description=pigeon-enroll secret enrollment server
 After=network-online.target
 Wants=network-online.target
-Before=pigeon-template.service
+Before=pigeon-template.service vault.service consul.service nomad.service pigeon-mesh.service pigeon-fence.service
 ConditionPathExists=/encrypted/pigeon/enrollment-key
-ConditionPathExists=/encrypted/pigeon/enroll.json
+ConditionPathExists=/encrypted/pigeon/enroll.hcl
 
 [Service]
-ExecStart=/opt/pigeon/bin/pigeon-enroll server -config=/encrypted/pigeon/enroll.json
+ExecStart=/opt/pigeon/bin/pigeon-enroll server -config=/encrypted/pigeon/enroll.hcl
+ExecStartPost=/opt/pigeon/bin/pigeon-enroll render -config=/etc/pigeon/render.hcl -vars=/encrypted/pigeon/secrets.json
 Restart=on-failure
 RestartSec=5
 

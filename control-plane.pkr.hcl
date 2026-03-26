@@ -108,8 +108,57 @@ build {
   }
 
   provisioner "file" {
+    source      = "templates/render-server.hcl"
+    destination = "/etc/pigeon/render.hcl"
+  }
+
+  provisioner "file" {
     source      = "templates/fence-server.hcl"
     destination = "/etc/pigeon/fence.hcl"
+  }
+
+  provisioner "shell" {
+    inline = ["mkdir -p /etc/pigeon/templates"]
+  }
+
+  provisioner "file" {
+    source      = "templates/mesh-ca.crt.tpl"
+    destination = "/etc/pigeon/templates/mesh-ca.crt.tpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/mesh-ca.key.tpl"
+    destination = "/etc/pigeon/templates/mesh-ca.key.tpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/mesh.json.tpl"
+    destination = "/etc/pigeon/templates/mesh.json.tpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/fence-ovh.hcl.tpl"
+    destination = "/etc/pigeon/templates/fence-ovh.hcl.tpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/consul-server.hcl.tpl"
+    destination = "/etc/pigeon/templates/consul-server.hcl.tpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/nomad-server.hcl.tpl"
+    destination = "/etc/pigeon/templates/nomad-server.hcl.tpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/vault.hcl.tpl"
+    destination = "/etc/pigeon/templates/vault.hcl.tpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/setup-worker.sh.tpl"
+    destination = "/etc/pigeon/templates/setup-worker.sh.tpl"
   }
 
   provisioner "file" {
