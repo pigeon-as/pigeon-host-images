@@ -15,6 +15,7 @@ source "exec" "enroll_cert" {
 template {
   destination = "/encrypted/pigeon/mesh-ca.crt"
   perms       = "0600"
+  command     = "systemctl reload-or-restart pigeon-mesh"
   contents = <<-EOT
     {{ $d := .secrets | parseJSON -}}
     {{ $v := index $d "vars" -}}
@@ -25,6 +26,7 @@ template {
 template {
   destination = "/encrypted/pigeon/mesh-ca.key"
   perms       = "0600"
+  command     = "systemctl reload-or-restart pigeon-mesh"
   contents = <<-EOT
     {{ $d := .secrets | parseJSON -}}
     {{ $v := index $d "vars" -}}
