@@ -69,19 +69,10 @@ rule "allow_wireguard_outbound" {
   comment   = "WireGuard tunnel"
 }
 
-rule "allow_memberlist_tcp_outbound" {
+rule "allow_memberlist_outbound" {
   provider  = provider.nftables
   direction = "outbound"
   protocol  = "tcp"
-  dst_port  = ["7946"]
-  action    = "accept"
-  comment   = "Memberlist gossip"
-}
-
-rule "allow_memberlist_udp_outbound" {
-  provider  = provider.nftables
-  direction = "outbound"
-  protocol  = "udp"
   dst_port  = ["7946"]
   action    = "accept"
   comment   = "Memberlist gossip"
