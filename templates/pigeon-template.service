@@ -2,7 +2,6 @@
 Description=pigeon-template config renderer
 After=network-online.target pigeon-enroll.service pigeon-mesh.service
 Wants=network-online.target
-Before=vault.service consul.service nomad.service
 
 [Service]
 ExecStart=/opt/pigeon/bin/pigeon-template --config=/etc/pigeon/template.hcl

@@ -1,6 +1,6 @@
 #!/bin/bash
 set -eu
-# Worker first-boot: LUKS setup + secret enrollment via ConfigDrive user_data.
+# Worker first-boot: LUKS setup + secret enrollment + config rendering via ConfigDrive user_data.
 
 : "${ENROLL_URL:?missing ENROLL_URL}"
 : "${ENROLL_TOKEN:?missing ENROLL_TOKEN}"
@@ -19,3 +19,8 @@ pigeon-enroll claim \
   -tls "$CERT_FILE" \
   -scope worker \
   -output /encrypted/pigeon/secrets.json
+
+# Render config files from templates using claimed secrets.
+pigeon-enroll render \
+  -config /etc/pigeon/render.hcl \
+  -vars /encrypted/pigeon/secrets.json

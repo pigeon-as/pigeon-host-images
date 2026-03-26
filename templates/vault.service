@@ -5,7 +5,7 @@ Wants=network-online.target pigeon-mesh.service
 After=network-online.target pigeon-mesh.service
 ConditionFileNotEmpty=/encrypted/vault/vault.hcl
 StartLimitIntervalSec=60
-StartLimitBurst=3
+StartLimitBurst=5
 
 [Service]
 Type=notify
