@@ -3,6 +3,28 @@ source "file" "secrets" {
 }
 
 template {
+  destination = "/encrypted/pigeon/mesh-ca.crt"
+  perms       = "0600"
+  command     = "systemctl reload-or-restart pigeon-mesh"
+  contents = <<-EOT
+    {{ $d := .secrets | parseJSON -}}
+    {{ $v := index $d "vars" -}}
+    {{ index $v "mesh_ca_cert" }}
+    EOT
+}
+
+template {
+  destination = "/encrypted/pigeon/mesh-ca.key"
+  perms       = "0600"
+  command     = "systemctl reload-or-restart pigeon-mesh"
+  contents = <<-EOT
+    {{ $d := .secrets | parseJSON -}}
+    {{ $v := index $d "vars" -}}
+    {{ index $v "mesh_ca_key" }}
+    EOT
+}
+
+template {
   destination = "/encrypted/pigeon/mesh.json"
   perms       = "0600"
   command     = "systemctl reload-or-restart pigeon-mesh"
@@ -15,7 +37,9 @@ template {
       "gossip_key": "{{ index $s "gossip_key" }}",
       "wg_psk": "{{ index $s "wg_psk" }}",
       "endpoint_interface": "eth0",
-      "egress_cidr": "{{ index $v "egress_cidr" }}"
+      "egress_cidr": "{{ index $v "egress_cidr" }}",
+      "tls_ca_cert": "/encrypted/pigeon/mesh-ca.crt",
+      "tls_ca_key": "/encrypted/pigeon/mesh-ca.key"
     }
     EOT
 }
@@ -141,20 +165,10 @@ template {
       comment   = "WireGuard tunnel (fleet only)"
     }
 
-    rule "allow_memberlist_tcp_inbound" {
+    rule "allow_memberlist_inbound" {
       provider  = provider.nftables
       direction = "inbound"
       protocol  = "tcp"
-      dst_port  = ["7946"]
-      source    = [data.ovh_ips.servers]
-      action    = "accept"
-      comment   = "Memberlist gossip (fleet only)"
-    }
-
-    rule "allow_memberlist_udp_inbound" {
-      provider  = provider.nftables
-      direction = "inbound"
-      protocol  = "udp"
       dst_port  = ["7946"]
       source    = [data.ovh_ips.servers]
       action    = "accept"
