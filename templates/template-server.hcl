@@ -13,8 +13,8 @@ source "exec" "enroll_cert" {
 }
 
 template {
-  source      = "/etc/pigeon/templates/worker-userdata.sh.tpl"
-  destination = "/etc/pigeon/worker-userdata.sh"
+  source      = "/etc/pigeon/templates/setup-worker.sh.tpl"
+  destination = "/encrypted/pigeon/setup-worker.sh"
   perms       = "0600"
 }
 

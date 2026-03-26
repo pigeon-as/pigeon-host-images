@@ -157,8 +157,8 @@ build {
   }
 
   provisioner "file" {
-    source      = "templates/worker-userdata.sh.tpl"
-    destination = "/etc/pigeon/templates/worker-userdata.sh.tpl"
+    source      = "templates/setup-worker.sh.tpl"
+    destination = "/etc/pigeon/templates/setup-worker.sh.tpl"
   }
 
   provisioner "file" {

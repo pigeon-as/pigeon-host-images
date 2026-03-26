@@ -182,11 +182,6 @@ build {
     destination = "/usr/local/bin/configure-luks.sh"
   }
 
-  provisioner "file" {
-    source      = "scripts/setup-worker.sh"
-    destination = "/usr/local/bin/setup-worker.sh"
-  }
-
   provisioner "shell" {
     inline = [
       "systemctl enable pigeon-mesh",

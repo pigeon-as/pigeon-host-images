@@ -2,9 +2,9 @@
 set -eu
 # Worker first-boot: LUKS setup + secret enrollment + config rendering via ConfigDrive user_data.
 
-: "${ENROLL_URL:?missing ENROLL_URL}"
-: "${ENROLL_TOKEN:?missing ENROLL_TOKEN}"
-: "${ENROLL_CERT:?missing ENROLL_CERT}"
+ENROLL_URL="${file.secrets.vars.enroll_url}"
+ENROLL_TOKEN="${exec.enroll_token}"
+ENROLL_CERT="${exec.enroll_cert}"
 
 bash /usr/local/bin/configure-luks.sh
 
