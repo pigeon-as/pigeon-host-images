@@ -1,1 +1,1 @@
-${secrets.mesh_ca_cert}
+${ca.mesh.cert_pem}

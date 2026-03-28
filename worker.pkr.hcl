@@ -43,8 +43,8 @@ build {
   sources = ["source.qemu.worker"]
 
   provisioner "file" {
-    source      = "templates/grub-defaults.cfg"
-    destination = "/etc/default/grub.d/50-pigeon.cfg"
+    source      = "templates/grub/cmdline"
+    destination = "/etc/kernel/cmdline"
   }
 
   provisioner "shell" {
