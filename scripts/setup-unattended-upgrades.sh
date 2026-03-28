@@ -16,7 +16,9 @@ Unattended-Upgrade::Automatic-Reboot "false";
 // Kernel updates require image rebuild (UKI + TPM PCR 11 re-seal).
 // Auto-upgrading the kernel would produce wrong PCR 11 → LUKS locked → bricked server.
 Unattended-Upgrade::Package-Blacklist {
-    "linux-";
+    "linux-image-";
+    "linux-headers-";
+    "linux-modules-";
 };
 EOF
 

@@ -20,6 +20,10 @@ update-initramfs -u
 # Build UKI (Unified Kernel Image) for measured boot
 # systemd-stub extends PCR 11 with the kernel image hash on boot.
 # iPXE loads the UKI directly via efiBootloaderPath (no GRUB in boot chain).
+if ! mountpoint -q /boot/efi; then
+  echo "ERROR: /boot/efi is not mounted — UEFI ESP required for UKI"
+  exit 1
+fi
 VMLINUZ=$(ls /boot/vmlinuz-* | sort -V | tail -1)
 INITRD=$(ls /boot/initrd.img-* | sort -V | tail -1)
 mkdir -p /boot/efi/EFI/Linux
