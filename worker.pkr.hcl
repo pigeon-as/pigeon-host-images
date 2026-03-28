@@ -43,7 +43,7 @@ build {
   sources = ["source.qemu.worker"]
 
   provisioner "file" {
-    source      = "templates/grub/cmdline"
+    source      = "templates/cmdline"
     destination = "/etc/kernel/cmdline"
   }
 
