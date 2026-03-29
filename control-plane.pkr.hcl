@@ -167,6 +167,16 @@ build {
   }
 
   provisioner "file" {
+    source      = "templates/vault-agent.hcl"
+    destination = "/etc/vault.d/vault-agent.hcl"
+  }
+
+  provisioner "file" {
+    source      = "templates/vault-agent.service"
+    destination = "/etc/systemd/system/vault-agent.service"
+  }
+
+  provisioner "file" {
     source      = "templates/consul.service"
     destination = "/etc/systemd/system/consul.service"
   }
@@ -218,6 +228,7 @@ build {
       "systemctl enable pigeon-enroll",
       "systemctl enable pigeon-template-secrets.path",
       "systemctl enable pigeon-enroll-actions",
+      "systemctl enable vault-agent",
     ]
   }
 

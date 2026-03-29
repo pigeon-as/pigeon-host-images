@@ -60,6 +60,7 @@ build {
       "scripts/setup-pigeon-mesh.sh",
       "scripts/setup-pigeon-enroll.sh",
       "scripts/setup-pigeon-fence.sh",
+      "scripts/setup-vault.sh",
       "scripts/setup-consul.sh",
       "scripts/setup-nomad.sh",
       "scripts/setup-firecracker.sh",
@@ -74,6 +75,7 @@ build {
       "PIGEON_MESH_VERSION=0.0.1-beta.1",
       "PIGEON_ENROLL_VERSION=0.0.1-beta.1",
       "PIGEON_FENCE_VERSION=0.0.1-beta.1",
+      "VAULT_VERSION=1.19.0-1",
       "CONSUL_VERSION=1.20.6-1",
       "NOMAD_VERSION=1.11.2-1",
       "FIRECRACKER_VERSION=1.14.2",
@@ -148,6 +150,16 @@ build {
   }
 
   provisioner "file" {
+    source      = "templates/vault-agent.hcl"
+    destination = "/etc/vault.d/vault-agent.hcl"
+  }
+
+  provisioner "file" {
+    source      = "templates/vault-agent.service"
+    destination = "/etc/systemd/system/vault-agent.service"
+  }
+
+  provisioner "file" {
     source      = "templates/nftables.conf"
     destination = "/etc/nftables.conf"
   }
@@ -186,6 +198,7 @@ build {
     inline = [
       "systemctl enable pigeon-mesh",
       "systemctl enable pigeon-fence",
+      "systemctl enable vault-agent",
     ]
   }
 
