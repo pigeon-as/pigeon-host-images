@@ -6,7 +6,7 @@ Two images: **[control-plane.qcow2](control-plane.pkr.hcl)** and **[worker.qcow2
 
 ## Measured Boot
 
-Images use UKI (Unified Kernel Image) with iPXE direct boot. LUKS is sealed to TPM2 PCR 7+11: PCR 7 covers firmware/Secure Boot config, PCR 11 is extended by `systemd-stub` with the UKI kernel/initrd hash. This means a kernel update without rebuilding the image will change PCR 11 and lock out the LUKS volume — kernel updates are blacklisted from unattended-upgrades for this reason.
+Images use UKI (Unified Kernel Image) with UEFI iPXE direct boot. LUKS is sealed to TPM2 PCR 7+11: PCR 7 covers firmware/Secure Boot config, PCR 11 is extended by `systemd-stub` with the UKI kernel/initrd hash. This means a kernel update without rebuilding the image will change PCR 11 and lock out the LUKS volume — kernel updates are blacklisted from unattended-upgrades for this reason.
 
 ## Build
 

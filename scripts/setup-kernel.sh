@@ -15,7 +15,7 @@ apt-get install -y linux-image-generic linux-headers-generic
 apt-get install -y mdadm lvm2 amd64-microcode intel-microcode curl jq
 
 # UKI (Unified Kernel Image) for measured boot — systemd-stub extends PCR 11
-apt-get install -y systemd-ukify
+apt-get install -y systemd-ukify systemd-boot-efi
 
 # Prevent cloud-init from reinstalling cloud GRUB or resizing partitions
 sed -Ei '/^\s*-\s*(grub-dpkg|growpart|resizefs)/d' /etc/cloud/cloud.cfg
