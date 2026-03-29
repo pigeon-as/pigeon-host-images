@@ -1,1 +1,1 @@
-${secrets.mesh_ca_key}
+${ca.mesh.private_key_pem}
