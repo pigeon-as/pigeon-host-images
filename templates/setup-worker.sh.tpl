@@ -24,10 +24,8 @@ pigeon-enroll claim \
   -scope worker \
   -output /encrypted/pigeon/secrets.json
 
-# Render config files from templates using claimed secrets.
-pigeon-enroll render \
-  -config /etc/pigeon/render.hcl \
-  -vars /encrypted/pigeon/secrets.json
+# Render configs, extract CAs, generate leaf certs — all in one pass.
+pigeon-template --once --config=/etc/pigeon/template.hcl
 
 # Start services that were waiting for rendered configs.
 systemctl start pigeon-mesh consul nomad

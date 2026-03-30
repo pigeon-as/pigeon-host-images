@@ -8,7 +8,7 @@ ConditionPathExists=/encrypted/pigeon/enroll.hcl
 
 [Service]
 ExecStart=/opt/pigeon/bin/pigeon-enroll server -config=/encrypted/pigeon/enroll.hcl
-ExecStartPost=/opt/pigeon/bin/pigeon-enroll render -config=/etc/pigeon/render.hcl -vars=/encrypted/pigeon/secrets.json
+ExecStartPost=/opt/pigeon/bin/pigeon-template --once --config=/etc/pigeon/template.hcl
 Restart=on-failure
 RestartSec=5
 

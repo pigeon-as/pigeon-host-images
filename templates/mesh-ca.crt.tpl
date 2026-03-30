@@ -1,1 +1,0 @@
-${ca.mesh.cert_pem}

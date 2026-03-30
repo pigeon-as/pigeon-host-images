@@ -1,1 +1,0 @@
-${ca.mesh.private_key_pem}

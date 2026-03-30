@@ -10,6 +10,15 @@ client {
   enabled = true
 }
 
+tls {
+  http      = true
+  rpc       = true
+  ca_file   = "/encrypted/tls/nomad/ca.crt"
+  cert_file = "/encrypted/tls/nomad/cert.pem"
+  key_file  = "/encrypted/tls/nomad/key.pem"
+  verify_server_hostname = true
+}
+
 addresses {
   http = "127.0.0.1 {{ GetInterfaceIP \"wg0\" }}"
   rpc  = "{{ GetInterfaceIP \"wg0\" }}"
@@ -34,7 +43,7 @@ consul {
 vault {
   enabled          = true
   address          = "https://127.0.0.1:8200"
-  tls_skip_verify  = true
+  tls_ca_file      = "/encrypted/tls/vault/ca.crt"
 
   default_identity {
     aud  = ["vault.io"]
