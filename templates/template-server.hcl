@@ -35,7 +35,19 @@ $${file.secrets.ca.vault.private_key_pem}
 EOT
   destination = "/encrypted/tls/vault/ca.pem"
   perms       = "0600"
-  command     = "pigeon-enroll generate-cert -from-ca /encrypted/tls/vault/ca.pem -cn $(hostname) -dns localhost -dns vault.service.internal -dns active.vault.service.internal -ip 127.0.0.1 -ttl 720h -cert /encrypted/tls/vault/cert.pem -key /encrypted/tls/vault/key.pem -ca /encrypted/tls/vault/ca.crt && chown vault:vault /encrypted/tls/vault/ca.crt /encrypted/tls/vault/cert.pem /encrypted/tls/vault/key.pem && chmod 0640 /encrypted/tls/vault/key.pem"
+  command     = <<-EOC
+    (
+      set -e
+      pigeon-enroll generate-cert -from-ca /encrypted/tls/vault/ca.pem \
+        -cn $(hostname) \
+        -dns localhost -dns vault.service.internal -dns active.vault.service.internal \
+        -ip 127.0.0.1 -ttl 720h \
+        -cert /encrypted/tls/vault/cert.pem \
+        -key /encrypted/tls/vault/key.pem \
+        -ca /encrypted/tls/vault/ca.crt
+      chown vault:vault /encrypted/tls/vault/{ca.crt,cert.pem,key.pem}
+    )
+  EOC
 }
 
 # --- Consul CA + leaf cert ---
@@ -47,7 +59,19 @@ $${file.secrets.ca.consul.private_key_pem}
 EOT
   destination = "/encrypted/tls/consul/ca.pem"
   perms       = "0600"
-  command     = "pigeon-enroll generate-cert -from-ca /encrypted/tls/consul/ca.pem -cn $(hostname) -dns localhost -dns server.$${file.secrets.vars.datacenter}.internal -ip 127.0.0.1 -ttl 720h -cert /encrypted/tls/consul/cert.pem -key /encrypted/tls/consul/key.pem -ca /encrypted/tls/consul/ca.crt && chown consul:consul /encrypted/tls/consul/ca.crt /encrypted/tls/consul/cert.pem /encrypted/tls/consul/key.pem && chmod 0640 /encrypted/tls/consul/key.pem"
+  command     = <<-EOC
+    (
+      set -e
+      pigeon-enroll generate-cert -from-ca /encrypted/tls/consul/ca.pem \
+        -cn $(hostname) \
+        -dns localhost -dns server.$${file.secrets.vars.datacenter}.internal \
+        -ip 127.0.0.1 -ttl 720h \
+        -cert /encrypted/tls/consul/cert.pem \
+        -key /encrypted/tls/consul/key.pem \
+        -ca /encrypted/tls/consul/ca.crt
+      chown consul:consul /encrypted/tls/consul/{ca.crt,cert.pem,key.pem}
+    )
+  EOC
 }
 
 # --- Nomad CA + leaf cert ---
@@ -59,7 +83,15 @@ $${file.secrets.ca.nomad.private_key_pem}
 EOT
   destination = "/encrypted/tls/nomad/ca.pem"
   perms       = "0600"
-  command     = "pigeon-enroll generate-cert -from-ca /encrypted/tls/nomad/ca.pem -cn $(hostname) -dns localhost -dns server.$${file.secrets.vars.region}.nomad -ip 127.0.0.1 -ttl 720h -cert /encrypted/tls/nomad/cert.pem -key /encrypted/tls/nomad/key.pem -ca /encrypted/tls/nomad/ca.crt && chmod 0640 /encrypted/tls/nomad/key.pem"
+  command     = <<-EOC
+    pigeon-enroll generate-cert -from-ca /encrypted/tls/nomad/ca.pem \
+      -cn $(hostname) \
+      -dns localhost -dns server.$${file.secrets.vars.region}.nomad \
+      -ip 127.0.0.1 -ttl 720h \
+      -cert /encrypted/tls/nomad/cert.pem \
+      -key /encrypted/tls/nomad/key.pem \
+      -ca /encrypted/tls/nomad/ca.crt
+  EOC
 }
 
 # --- Service configs ---
