@@ -1,6 +1,7 @@
 [Unit]
 Description=Vault Agent (Nomad TLS cert renewal from Vault PKI)
-After=pigeon-mesh.service consul.service
+Wants=network-online.target
+After=network-online.target pigeon-mesh.service consul.service
 Requires=pigeon-mesh.service consul.service
 ConditionPathExists=/encrypted/tls/auth/cert.pem
 
