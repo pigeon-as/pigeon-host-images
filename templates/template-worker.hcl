@@ -16,71 +16,46 @@ template {
   perms       = "0600"
 }
 
-# --- Vault CA + leaf cert ---
+# --- Vault CA cert (workers verify server TLS, no leaf cert needed) ---
 
 template {
-  content     = <<-EOT
-$${file.secrets.ca.vault.cert_pem}
-$${file.secrets.ca.vault.private_key_pem}
-EOT
-  destination = "/encrypted/tls/vault/ca.pem"
-  perms       = "0600"
-  command     = <<-EOC
-    (
-      set -e
-      pigeon-enroll generate-cert -from-ca /encrypted/tls/vault/ca.pem \
-        -cn $(hostname) \
-        -dns localhost \
-        -ip 127.0.0.1 -ttl 720h \
-        -cert /encrypted/tls/vault/cert.pem \
-        -key /encrypted/tls/vault/key.pem \
-        -ca /encrypted/tls/vault/ca.crt
-      chown vault:vault /encrypted/tls/vault/{ca.crt,cert.pem,key.pem}
-    )
-  EOC
+  content     = "$${file.secrets.ca.vault.cert_pem}"
+  destination = "/encrypted/tls/vault/ca.crt"
+  perms       = "0644"
 }
 
-# --- Consul CA + leaf cert ---
+# --- Consul CA cert (auto_encrypt handles leaf certs) ---
 
 template {
-  content     = <<-EOT
-$${file.secrets.ca.consul.cert_pem}
-$${file.secrets.ca.consul.private_key_pem}
-EOT
-  destination = "/encrypted/tls/consul/ca.pem"
-  perms       = "0600"
-  command     = <<-EOC
-    (
-      set -e
-      pigeon-enroll generate-cert -from-ca /encrypted/tls/consul/ca.pem \
-        -cn $(hostname) \
-        -dns localhost \
-        -ip 127.0.0.1 -ttl 720h \
-        -cert /encrypted/tls/consul/cert.pem \
-        -key /encrypted/tls/consul/key.pem \
-        -ca /encrypted/tls/consul/ca.crt
-      chown consul:consul /encrypted/tls/consul/{ca.crt,cert.pem,key.pem}
-    )
-  EOC
+  content     = "$${file.secrets.ca.consul.cert_pem}"
+  destination = "/encrypted/tls/consul/ca.crt"
+  perms       = "0644"
 }
 
-# --- Nomad CA + leaf cert ---
+# --- Nomad CA cert (trust only — vault-agent issues leaf certs from Vault PKI) ---
+
+template {
+  content     = "$${file.secrets.ca.nomad.cert_pem}"
+  destination = "/encrypted/tls/nomad/ca.crt"
+  perms       = "0644"
+}
+
+# --- Auth CA + leaf cert (for vault-agent cert auth to Vault) ---
 
 template {
   content     = <<-EOT
-$${file.secrets.ca.nomad.cert_pem}
-$${file.secrets.ca.nomad.private_key_pem}
+$${file.secrets.ca.auth.cert_pem}
+$${file.secrets.ca.auth.private_key_pem}
 EOT
-  destination = "/encrypted/tls/nomad/ca.pem"
+  destination = "/encrypted/tls/auth/ca.pem"
   perms       = "0600"
   command     = <<-EOC
-    pigeon-enroll generate-cert -from-ca /encrypted/tls/nomad/ca.pem \
+    pigeon-enroll generate-cert -from-ca /encrypted/tls/auth/ca.pem \
       -cn $(hostname) \
-      -dns localhost \
-      -ip 127.0.0.1 -ttl 720h \
-      -cert /encrypted/tls/nomad/cert.pem \
-      -key /encrypted/tls/nomad/key.pem \
-      -ca /encrypted/tls/nomad/ca.crt
+      -ttl 720h \
+      -cert /encrypted/tls/auth/cert.pem \
+      -key /encrypted/tls/auth/key.pem \
+      -ca /encrypted/tls/auth/ca.crt
   EOC
 }
 

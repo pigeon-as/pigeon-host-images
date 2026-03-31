@@ -13,6 +13,10 @@ addresses {
 
 retry_join = ${vars.consul_retry_join}
 
+auto_encrypt {
+  tls = true
+}
+
 encrypt = "${secrets.consul_encrypt}"
 
 acl {
@@ -26,12 +30,10 @@ acl {
 
 tls {
   defaults {
-    ca_file   = "/encrypted/tls/consul/ca.crt"
-    cert_file = "/encrypted/tls/consul/cert.pem"
-    key_file  = "/encrypted/tls/consul/key.pem"
+    ca_file = "/encrypted/tls/consul/ca.crt"
   }
   internal_rpc {
-    verify_incoming        = true
+    verify_incoming        = false
     verify_outgoing        = true
     verify_server_hostname = true
   }

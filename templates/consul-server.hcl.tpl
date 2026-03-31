@@ -14,6 +14,10 @@ addresses {
 
 retry_join = ${vars.consul_retry_join}
 
+auto_encrypt {
+  allow_tls = true
+}
+
 encrypt = "${secrets.consul_encrypt}"
 
 acl {

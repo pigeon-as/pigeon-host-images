@@ -28,4 +28,5 @@ pigeon-enroll claim \
 pigeon-template --once --config=/etc/pigeon/template.hcl
 
 # Start services that were waiting for rendered configs.
-systemctl start pigeon-mesh consul nomad
+# vault-agent issues Nomad TLS cert → nomad-cert.path detects it → starts nomad.
+systemctl start pigeon-mesh consul vault-agent

@@ -1,0 +1,4 @@
+{{ $cn := printf "common_name=%s" (env "HOSTNAME") -}}
+{{ with pkiCert "pki_nomad/issue/nomad-client" $cn "ttl=24h" -}}
+{{ .Cert }}{{ .CA }}
+{{- end }}

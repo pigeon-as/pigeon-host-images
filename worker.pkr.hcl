@@ -123,6 +123,21 @@ build {
   }
 
   provisioner "file" {
+    source      = "templates/vault-agent.hcl"
+    destination = "/etc/pigeon/vault-agent.hcl"
+  }
+
+  provisioner "file" {
+    source      = "templates/vault-templates/"
+    destination = "/etc/pigeon/vault-templates"
+  }
+
+  provisioner "file" {
+    source      = "templates/vault-agent.service"
+    destination = "/etc/systemd/system/vault-agent.service"
+  }
+
+  provisioner "file" {
     source      = "templates/fence-worker.hcl"
     destination = "/etc/pigeon/fence.hcl"
   }
@@ -135,6 +150,11 @@ build {
   provisioner "file" {
     source      = "templates/nomad.service"
     destination = "/etc/systemd/system/nomad.service"
+  }
+
+  provisioner "file" {
+    source      = "templates/nomad-cert.path"
+    destination = "/etc/systemd/system/nomad-cert.path"
   }
 
   provisioner "file" {
@@ -186,7 +206,8 @@ build {
       "systemctl enable pigeon-mesh",
       "systemctl enable pigeon-fence",
       "systemctl enable consul",
-      "systemctl enable nomad",
+      "systemctl enable vault-agent",
+      "systemctl enable nomad-cert.path",
       "systemctl enable bird",
       "systemctl enable haproxy",
     ]
