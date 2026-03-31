@@ -1,0 +1,15 @@
+[Unit]
+Description=Vault Agent (Nomad TLS cert renewal from Vault PKI)
+Wants=network-online.target
+After=network-online.target pigeon-mesh.service consul.service
+Requires=pigeon-mesh.service consul.service
+ConditionPathExists=/encrypted/tls/auth/cert.pem
+
+[Service]
+ExecStart=/usr/bin/vault agent -config=/etc/pigeon/vault-agent.hcl
+Restart=on-failure
+RestartSec=5
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

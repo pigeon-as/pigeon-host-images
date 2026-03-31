@@ -1,0 +1,9 @@
+[Unit]
+Description=Watch for Nomad TLS certificate from Vault PKI
+
+[Path]
+PathExists=/encrypted/tls/nomad/cert.pem
+Unit=nomad.service
+
+[Install]
+WantedBy=multi-user.target
