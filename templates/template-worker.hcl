@@ -40,23 +40,24 @@ template {
   perms       = "0644"
 }
 
-# --- Auth CA + leaf cert (for vault-agent cert auth to Vault) ---
+# --- Auth CA cert + leaf cert (server-issued during claim, for vault-agent cert auth) ---
 
 template {
-  content     = <<-EOT
-$${file.secrets.ca.auth.cert_pem}
-$${file.secrets.ca.auth.private_key_pem}
-EOT
-  destination = "/encrypted/tls/auth/ca.pem"
+  content     = "$${file.secrets.ca.auth.cert_pem}"
+  destination = "/encrypted/tls/auth/ca.crt"
+  perms       = "0644"
+}
+
+template {
+  content     = "$${file.secrets.certs.auth_worker.cert_pem}"
+  destination = "/encrypted/tls/auth/cert.pem"
   perms       = "0600"
-  command     = <<-EOC
-    pigeon-enroll generate-cert -from-ca /encrypted/tls/auth/ca.pem \
-      -cn $(hostname) \
-      -ttl 720h \
-      -cert /encrypted/tls/auth/cert.pem \
-      -key /encrypted/tls/auth/key.pem \
-      -ca /encrypted/tls/auth/ca.crt
-  EOC
+}
+
+template {
+  content     = "$${file.secrets.certs.auth_worker.key_pem}"
+  destination = "/encrypted/tls/auth/key.pem"
+  perms       = "0600"
 }
 
 # --- Service configs ---
