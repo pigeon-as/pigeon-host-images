@@ -1,9 +1,9 @@
 [Unit]
-Description=Watch for pigeon secrets file
+Description=Watch for pigeon enrollment secrets
 
 [Path]
 PathExists=/encrypted/pigeon/enroll.json
-Unit=pigeon-template.service
+Unit=pigeon-template-bootstrap.service
 
 [Install]
 WantedBy=multi-user.target

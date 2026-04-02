@@ -89,13 +89,18 @@ build {
   }
 
   provisioner "file" {
-    source      = "templates/pigeon-template.service"
-    destination = "/etc/systemd/system/pigeon-template.service"
+    source      = "templates/pigeon-template-bootstrap.service"
+    destination = "/etc/systemd/system/pigeon-template-bootstrap.service"
   }
 
   provisioner "file" {
-    source      = "templates/pigeon-template-enroll.path"
-    destination = "/etc/systemd/system/pigeon-template-enroll.path"
+    source      = "templates/pigeon-template-reconcile.service"
+    destination = "/etc/systemd/system/pigeon-template-reconcile.service"
+  }
+
+  provisioner "file" {
+    source      = "templates/pigeon-template-bootstrap.path"
+    destination = "/etc/systemd/system/pigeon-template-bootstrap.path"
   }
 
   provisioner "file" {
@@ -104,8 +109,13 @@ build {
   }
 
   provisioner "file" {
-    source      = "templates/template-server.hcl"
-    destination = "/etc/pigeon/template.hcl"
+    source      = "templates/bootstrap-server.tmpl.hcl"
+    destination = "/etc/pigeon/bootstrap.tmpl.hcl"
+  }
+
+  provisioner "file" {
+    source      = "templates/reconcile-server.tmpl.hcl"
+    destination = "/etc/pigeon/reconcile.tmpl.hcl"
   }
 
   provisioner "file" {
@@ -218,7 +228,8 @@ build {
       "systemctl enable pigeon-mesh",
       "systemctl enable pigeon-fence",
       "systemctl enable pigeon-enroll",
-      "systemctl enable pigeon-template-enroll.path",
+      "systemctl enable pigeon-template-bootstrap.path",
+      "systemctl enable pigeon-template-reconcile",
       "systemctl enable pigeon-enroll-actions",
       "systemctl enable vault",
       "systemctl enable consul",

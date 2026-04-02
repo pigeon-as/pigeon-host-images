@@ -29,7 +29,7 @@ PETNAME=$(pigeon-petname)
 hostnamectl set-hostname "$${PETNAME}.worker.${file.enroll.vars.datacenter}.${file.enroll.vars.region}.${file.enroll.vars.domain}"
 
 # Render configs, extract CAs, generate leaf certs — all in one pass.
-pigeon-template --once --config=/etc/pigeon/template.hcl
+pigeon-template --once --config=/etc/pigeon/bootstrap.tmpl.hcl
 
 # Start services that were waiting for rendered configs.
 # vault-agent issues Nomad TLS cert → nomad-cert.path detects it → starts nomad.

@@ -2,11 +2,6 @@ source "file" "enroll" {
   path = "/encrypted/pigeon/enroll.json"
 }
 
-source "exec" "peers" {
-  command  = "pigeon-mesh list-peers"
-  interval = "30s"
-}
-
 # --- Mesh CA (pigeon-mesh reads these directly) ---
 
 template {
@@ -93,6 +88,12 @@ template {
   perms       = "0640"
 }
 
+template {
+  source      = "/etc/pigeon/resolv.conf.tpl"
+  destination = "/etc/resolv.conf"
+  perms       = "0644"
+}
+
 # --- Unbound config (domain from enrollment vars) ---
 
 template {
@@ -100,21 +101,6 @@ template {
   destination = "/etc/unbound/unbound.conf"
   perms       = "0644"
   command     = "systemctl restart unbound"
-}
-
-# --- Infrastructure DNS zone (from mesh peers) ---
-
-template {
-  source      = "/etc/pigeon/infra.zone.tpl"
-  destination = "/etc/unbound/zones/infra.zone"
-  perms       = "0644"
-  command     = "unbound-control auth_zone_reload $${file.enroll.vars.domain}"
-}
-
-template {
-  source      = "/etc/pigeon/resolv.conf.tpl"
-  destination = "/etc/resolv.conf"
-  perms       = "0644"
 }
 
 log_level = "info"

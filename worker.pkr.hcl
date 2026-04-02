@@ -121,8 +121,18 @@ build {
   }
 
   provisioner "file" {
-    source      = "templates/template-worker.hcl"
-    destination = "/etc/pigeon/template.hcl"
+    source      = "templates/bootstrap-worker.tmpl.hcl"
+    destination = "/etc/pigeon/bootstrap.tmpl.hcl"
+  }
+
+  provisioner "file" {
+    source      = "templates/reconcile-worker.tmpl.hcl"
+    destination = "/etc/pigeon/reconcile.tmpl.hcl"
+  }
+
+  provisioner "file" {
+    source      = "templates/pigeon-template-reconcile.service"
+    destination = "/etc/systemd/system/pigeon-template-reconcile.service"
   }
 
   provisioner "file" {
@@ -223,6 +233,7 @@ build {
       "systemctl enable unattended-upgrades",
       "systemctl enable pigeon-mesh",
       "systemctl enable pigeon-fence",
+      "systemctl enable pigeon-template-reconcile",
       "systemctl enable unbound",
       "systemctl disable systemd-resolved",
       "systemctl enable consul",

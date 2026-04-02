@@ -1,0 +1,12 @@
+[Unit]
+Description=pigeon-template reconciler
+After=pigeon-mesh.service
+Wants=pigeon-mesh.service
+
+[Service]
+ExecStart=/opt/pigeon/bin/pigeon-template --config=/etc/pigeon/reconcile.tmpl.hcl
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
