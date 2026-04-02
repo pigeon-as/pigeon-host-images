@@ -24,6 +24,10 @@ pigeon-enroll claim \
   -scope worker \
   -output /encrypted/pigeon/secrets.json
 
+# Generate unique hostname and promote to FQDN — pigeon-mesh derives overlay address from it.
+PETNAME=$(pigeon-petname)
+hostnamectl set-hostname "$${PETNAME}.worker.${file.secrets.vars.datacenter}.${file.secrets.vars.region}.${file.secrets.vars.domain}"
+
 # Render configs, extract CAs, generate leaf certs — all in one pass.
 pigeon-template --once --config=/etc/pigeon/template.hcl
 

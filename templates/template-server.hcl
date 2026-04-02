@@ -2,6 +2,11 @@ source "file" "secrets" {
   path = "/encrypted/pigeon/secrets.json"
 }
 
+source "exec" "peers" {
+  command  = "pigeon-mesh list-peers"
+  interval = "30s"
+}
+
 source "exec" "enroll_token" {
   command  = "pigeon-enroll generate-token -config=/encrypted/pigeon/enroll.hcl"
   interval = "10m"
@@ -128,6 +133,30 @@ template {
   perms       = "0640"
   user        = "vault"
   group       = "vault"
+}
+
+template {
+  source      = "/etc/pigeon/resolv.conf.tpl"
+  destination = "/etc/resolv.conf"
+  perms       = "0644"
+}
+
+# --- Unbound config (domain from enrollment vars) ---
+
+template {
+  source      = "/etc/pigeon/unbound.conf.tpl"
+  destination = "/etc/unbound/unbound.conf"
+  perms       = "0644"
+  command     = "systemctl restart unbound"
+}
+
+# --- Infrastructure DNS zone (from mesh peers) ---
+
+template {
+  source      = "/etc/pigeon/infra.zone.tpl"
+  destination = "/etc/unbound/zones/infra.zone"
+  perms       = "0644"
+  command     = "unbound-control auth_zone_reload ${file.secrets.vars.domain}"
 }
 
 # --- Setup worker script (uses exec sources for token rotation) ---

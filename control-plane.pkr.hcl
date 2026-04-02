@@ -64,6 +64,7 @@ build {
       "scripts/setup-vault.sh",
       "scripts/setup-consul.sh",
       "scripts/setup-nomad.sh",
+      "scripts/setup-unbound.sh",
       "scripts/setup-unattended-upgrades.sh",
     ]
     environment_vars = [
@@ -138,6 +139,21 @@ build {
   }
 
   provisioner "file" {
+    source      = "templates/unbound.conf.tpl"
+    destination = "/etc/pigeon/unbound.conf.tpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/infra.zone.tpl"
+    destination = "/etc/pigeon/infra.zone.tpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/resolv.conf.tpl"
+    destination = "/etc/pigeon/resolv.conf.tpl"
+  }
+
+  provisioner "file" {
     source      = "templates/setup-worker.sh.tpl"
     destination = "/etc/pigeon/setup-worker.sh.tpl"
   }
@@ -207,6 +223,7 @@ build {
       "systemctl enable vault",
       "systemctl enable consul",
       "systemctl enable nomad",
+      "systemctl enable unbound",
     ]
   }
 

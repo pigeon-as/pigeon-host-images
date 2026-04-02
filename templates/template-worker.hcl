@@ -2,6 +2,11 @@ source "file" "secrets" {
   path = "/encrypted/pigeon/secrets.json"
 }
 
+source "exec" "peers" {
+  command  = "pigeon-mesh list-peers"
+  interval = "30s"
+}
+
 # --- Mesh CA (pigeon-mesh reads these directly) ---
 
 template {
@@ -86,6 +91,30 @@ template {
   source      = "/etc/pigeon/nomad.hcl.tpl"
   destination = "/encrypted/nomad/nomad.hcl"
   perms       = "0640"
+}
+
+# --- Unbound config (domain from enrollment vars) ---
+
+template {
+  source      = "/etc/pigeon/unbound.conf.tpl"
+  destination = "/etc/unbound/unbound.conf"
+  perms       = "0644"
+  command     = "systemctl restart unbound"
+}
+
+# --- Infrastructure DNS zone (from mesh peers) ---
+
+template {
+  source      = "/etc/pigeon/infra.zone.tpl"
+  destination = "/etc/unbound/zones/infra.zone"
+  perms       = "0644"
+  command     = "unbound-control auth_zone_reload ${file.secrets.vars.domain}"
+}
+
+template {
+  source      = "/etc/pigeon/resolv.conf.tpl"
+  destination = "/etc/resolv.conf"
+  perms       = "0644"
 }
 
 log_level = "info"

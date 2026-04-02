@@ -61,6 +61,8 @@ build {
       "scripts/setup-pigeon-enroll.sh",
       "scripts/setup-pigeon-template.sh",
       "scripts/setup-pigeon-fence.sh",
+      "scripts/setup-pigeon-petname.sh",
+      "scripts/setup-unbound.sh",
       "scripts/setup-vault.sh",
       "scripts/setup-consul.sh",
       "scripts/setup-nomad.sh",
@@ -77,6 +79,7 @@ build {
       "PIGEON_ENROLL_VERSION=0.0.1-beta.1",
       "PIGEON_TEMPLATE_VERSION=0.0.1-beta.1",
       "PIGEON_FENCE_VERSION=0.0.1-beta.1",
+      "PIGEON_PETNAME_VERSION=0.0.1-beta.1",
       "VAULT_VERSION=1.19.0-1",
       "CONSUL_VERSION=1.20.6-1",
       "NOMAD_VERSION=1.11.2-1",
@@ -143,6 +146,21 @@ build {
   }
 
   provisioner "file" {
+    source      = "templates/unbound.conf.tpl"
+    destination = "/etc/pigeon/unbound.conf.tpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/infra.zone.tpl"
+    destination = "/etc/pigeon/infra.zone.tpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/resolv.conf.tpl"
+    destination = "/etc/pigeon/resolv.conf.tpl"
+  }
+
+  provisioner "file" {
     source      = "templates/consul.service"
     destination = "/etc/systemd/system/consul.service"
   }
@@ -205,6 +223,7 @@ build {
       "systemctl enable unattended-upgrades",
       "systemctl enable pigeon-mesh",
       "systemctl enable pigeon-fence",
+      "systemctl enable unbound",
       "systemctl enable consul",
       "systemctl enable vault-agent",
       "systemctl enable nomad-cert.path",
