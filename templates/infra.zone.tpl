@@ -1,9 +1,9 @@
 ; Infrastructure DNS zone — rendered by pigeon-template from mesh peers.
-; Reload: unbound-control auth_zone_reload infra.pigeon.as
+; Reload: unbound-control auth_zone_reload ${file.secrets.vars.domain}
 $ORIGIN ${file.secrets.vars.domain}.
 $TTL 300
 
-@  IN SOA servers.${file.secrets.vars.domain}. admin.pigeon.as. (
+@  IN SOA servers.${file.secrets.vars.domain}. admin.${file.secrets.vars.domain}. (
     1       ; serial
     3600    ; refresh
     900     ; retry
