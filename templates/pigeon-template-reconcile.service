@@ -1,7 +1,7 @@
 [Unit]
 Description=pigeon-template reconciler
-After=pigeon-mesh.service
-Wants=pigeon-mesh.service
+After=unbound.service pigeon-mesh.service
+Wants=unbound.service pigeon-mesh.service
 
 [Service]
 ExecStart=/opt/pigeon/bin/pigeon-template --config=/etc/pigeon/reconcile.tmpl.hcl
