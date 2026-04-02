@@ -224,6 +224,7 @@ build {
       "systemctl enable consul",
       "systemctl enable nomad",
       "systemctl enable unbound",
+      "systemctl disable systemd-resolved",
     ]
   }
 

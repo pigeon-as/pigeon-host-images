@@ -224,6 +224,7 @@ build {
       "systemctl enable pigeon-mesh",
       "systemctl enable pigeon-fence",
       "systemctl enable unbound",
+      "systemctl disable systemd-resolved",
       "systemctl enable consul",
       "systemctl enable vault-agent",
       "systemctl enable nomad-cert.path",

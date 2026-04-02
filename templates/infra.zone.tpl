@@ -3,7 +3,7 @@
 $ORIGIN ${file.secrets.vars.domain}.
 $TTL 300
 
-@  IN SOA ns1.${file.secrets.vars.domain}. admin.pigeon.as. (
+@  IN SOA servers.${file.secrets.vars.domain}. admin.pigeon.as. (
     1       ; serial
     3600    ; refresh
     900     ; retry

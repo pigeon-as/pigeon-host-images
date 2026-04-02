@@ -1,11 +1,11 @@
 server:
-    interface: 0.0.0.0
-    interface: ::0
+    interface: 127.0.0.1
+    interface: ::1
     port: 53
     username: "unbound"
 
-    access-control: 0.0.0.0/0 allow
-    access-control: ::/0 allow
+    access-control: 127.0.0.0/8 allow
+    access-control: ::1/128 allow
 
     hide-identity: yes
     hide-version: yes
