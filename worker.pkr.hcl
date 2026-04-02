@@ -141,8 +141,13 @@ build {
   }
 
   provisioner "file" {
-    source      = "templates/vault-templates/"
-    destination = "/etc/pigeon/vault-templates"
+    source      = "templates/nomad-cert.ctmpl"
+    destination = "/etc/pigeon/nomad-cert.ctmpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/nomad-key.ctmpl"
+    destination = "/etc/pigeon/nomad-key.ctmpl"
   }
 
   provisioner "file" {

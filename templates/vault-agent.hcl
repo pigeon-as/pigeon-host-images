@@ -18,13 +18,13 @@ template_config {
 }
 
 template {
-  source      = "/etc/pigeon/vault-templates/nomad-key.ctmpl"
+  source      = "/etc/pigeon/nomad-key.ctmpl"
   destination = "/encrypted/tls/nomad/key.pem"
   perms       = 0600
 }
 
 template {
-  source      = "/etc/pigeon/vault-templates/nomad-cert.ctmpl"
+  source      = "/etc/pigeon/nomad-cert.ctmpl"
   destination = "/encrypted/tls/nomad/cert.pem"
   perms       = 0640
   command     = "systemctl reload nomad 2>/dev/null || true"
