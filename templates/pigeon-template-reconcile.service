@@ -2,6 +2,7 @@
 Description=pigeon-template reconciler
 After=unbound.service pigeon-mesh.service
 Wants=unbound.service pigeon-mesh.service
+ConditionPathExists=/encrypted/pigeon/enroll.json
 
 [Service]
 ExecStart=/opt/pigeon/bin/pigeon-template --config=/etc/pigeon/reconcile.tmpl.hcl
