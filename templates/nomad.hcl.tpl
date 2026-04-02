@@ -20,7 +20,7 @@ addresses {
   serf = "{{ GetInterfaceIP \"wg0\" }}"
 }
 
-servers = ${vars.nomad_servers}
+servers = ["servers.${vars.datacenter}.${vars.domain}"]
 
 consul {
   address = "127.0.0.1:8500"

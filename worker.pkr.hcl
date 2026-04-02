@@ -61,6 +61,8 @@ build {
       "scripts/setup-pigeon-enroll.sh",
       "scripts/setup-pigeon-template.sh",
       "scripts/setup-pigeon-fence.sh",
+      "scripts/setup-pigeon-petname.sh",
+      "scripts/setup-unbound.sh",
       "scripts/setup-vault.sh",
       "scripts/setup-consul.sh",
       "scripts/setup-nomad.sh",
@@ -77,6 +79,7 @@ build {
       "PIGEON_ENROLL_VERSION=0.0.1-beta.1",
       "PIGEON_TEMPLATE_VERSION=0.0.1-beta.1",
       "PIGEON_FENCE_VERSION=0.0.1-beta.1",
+      "PIGEON_PETNAME_VERSION=0.0.1-beta.1",
       "VAULT_VERSION=1.19.0-1",
       "CONSUL_VERSION=1.20.6-1",
       "NOMAD_VERSION=1.11.2-1",
@@ -118,8 +121,18 @@ build {
   }
 
   provisioner "file" {
-    source      = "templates/template-worker.hcl"
-    destination = "/etc/pigeon/template.hcl"
+    source      = "templates/bootstrap-worker.tmpl.hcl"
+    destination = "/etc/pigeon/bootstrap.tmpl.hcl"
+  }
+
+  provisioner "file" {
+    source      = "templates/reconcile-worker.tmpl.hcl"
+    destination = "/etc/pigeon/reconcile.tmpl.hcl"
+  }
+
+  provisioner "file" {
+    source      = "templates/pigeon-template-reconcile.service"
+    destination = "/etc/systemd/system/pigeon-template-reconcile.service"
   }
 
   provisioner "file" {
@@ -128,8 +141,13 @@ build {
   }
 
   provisioner "file" {
-    source      = "templates/vault-templates/"
-    destination = "/etc/pigeon/vault-templates"
+    source      = "templates/nomad-cert.ctmpl"
+    destination = "/etc/pigeon/nomad-cert.ctmpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/nomad-key.ctmpl"
+    destination = "/etc/pigeon/nomad-key.ctmpl"
   }
 
   provisioner "file" {
@@ -140,6 +158,21 @@ build {
   provisioner "file" {
     source      = "templates/fence-worker.hcl"
     destination = "/etc/pigeon/fence.hcl"
+  }
+
+  provisioner "file" {
+    source      = "templates/unbound.conf.tpl"
+    destination = "/etc/pigeon/unbound.conf.tpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/infra.zone.tpl"
+    destination = "/etc/pigeon/infra.zone.tpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/resolv.conf.tpl"
+    destination = "/etc/pigeon/resolv.conf.tpl"
   }
 
   provisioner "file" {
@@ -205,6 +238,9 @@ build {
       "systemctl enable unattended-upgrades",
       "systemctl enable pigeon-mesh",
       "systemctl enable pigeon-fence",
+      "systemctl enable pigeon-template-reconcile",
+      "systemctl enable unbound",
+      "systemctl disable systemd-resolved",
       "systemctl enable consul",
       "systemctl enable vault-agent",
       "systemctl enable nomad-cert.path",

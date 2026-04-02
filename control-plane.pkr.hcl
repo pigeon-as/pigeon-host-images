@@ -64,6 +64,7 @@ build {
       "scripts/setup-vault.sh",
       "scripts/setup-consul.sh",
       "scripts/setup-nomad.sh",
+      "scripts/setup-unbound.sh",
       "scripts/setup-unattended-upgrades.sh",
     ]
     environment_vars = [
@@ -88,13 +89,18 @@ build {
   }
 
   provisioner "file" {
-    source      = "templates/pigeon-template.service"
-    destination = "/etc/systemd/system/pigeon-template.service"
+    source      = "templates/pigeon-template-bootstrap.service"
+    destination = "/etc/systemd/system/pigeon-template-bootstrap.service"
   }
 
   provisioner "file" {
-    source      = "templates/pigeon-template-secrets.path"
-    destination = "/etc/systemd/system/pigeon-template-secrets.path"
+    source      = "templates/pigeon-template-reconcile.service"
+    destination = "/etc/systemd/system/pigeon-template-reconcile.service"
+  }
+
+  provisioner "file" {
+    source      = "templates/pigeon-template-bootstrap.path"
+    destination = "/etc/systemd/system/pigeon-template-bootstrap.path"
   }
 
   provisioner "file" {
@@ -103,8 +109,13 @@ build {
   }
 
   provisioner "file" {
-    source      = "templates/template-server.hcl"
-    destination = "/etc/pigeon/template.hcl"
+    source      = "templates/bootstrap-server.tmpl.hcl"
+    destination = "/etc/pigeon/bootstrap.tmpl.hcl"
+  }
+
+  provisioner "file" {
+    source      = "templates/reconcile-server.tmpl.hcl"
+    destination = "/etc/pigeon/reconcile.tmpl.hcl"
   }
 
   provisioner "file" {
@@ -135,6 +146,21 @@ build {
   provisioner "file" {
     source      = "templates/vault.hcl.tpl"
     destination = "/etc/pigeon/vault.hcl.tpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/unbound.conf.tpl"
+    destination = "/etc/pigeon/unbound.conf.tpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/infra.zone.tpl"
+    destination = "/etc/pigeon/infra.zone.tpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/resolv.conf.tpl"
+    destination = "/etc/pigeon/resolv.conf.tpl"
   }
 
   provisioner "file" {
@@ -202,11 +228,14 @@ build {
       "systemctl enable pigeon-mesh",
       "systemctl enable pigeon-fence",
       "systemctl enable pigeon-enroll",
-      "systemctl enable pigeon-template-secrets.path",
+      "systemctl enable pigeon-template-bootstrap.path",
+      "systemctl enable pigeon-template-reconcile",
       "systemctl enable pigeon-enroll-actions",
       "systemctl enable vault",
       "systemctl enable consul",
       "systemctl enable nomad",
+      "systemctl enable unbound",
+      "systemctl disable systemd-resolved",
     ]
   }
 

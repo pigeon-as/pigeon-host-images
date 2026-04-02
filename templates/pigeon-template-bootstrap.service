@@ -1,0 +1,8 @@
+[Unit]
+Description=pigeon-template bootstrap config renderer (one-shot)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/opt/pigeon/bin/pigeon-template --once --config=/etc/pigeon/bootstrap.tmpl.hcl

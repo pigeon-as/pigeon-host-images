@@ -3,11 +3,11 @@ Description=pigeon-enroll post-claim actions (vault-init, luks-recovery, etc.)
 After=vault.service
 Requires=vault.service
 ConditionPathExists=!/encrypted/vault/init.json
-ConditionFileNotEmpty=/encrypted/pigeon/enroll.hcl
+ConditionFileNotEmpty=/encrypted/pigeon/enroll-server.hcl
 
 [Service]
 Type=oneshot
-ExecStart=/opt/pigeon/bin/pigeon-enroll run-actions -config=/encrypted/pigeon/enroll.hcl
+ExecStart=/opt/pigeon/bin/pigeon-enroll run-actions -config=/encrypted/pigeon/enroll-server.hcl
 RemainAfterExit=yes
 
 [Install]

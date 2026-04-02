@@ -12,7 +12,9 @@ addresses {
   dns   = "127.0.0.1 {{ GetInterfaceIP \"wg0\" }}"
 }
 
-retry_join = ${vars.consul_retry_join}
+retry_join = ["servers.${vars.datacenter}.${vars.domain}"]
+
+retry_join_wan = ["servers.${vars.domain}"]
 
 auto_encrypt {
   allow_tls = true

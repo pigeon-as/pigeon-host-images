@@ -1,9 +1,0 @@
-[Unit]
-Description=pigeon-template config renderer
-After=network-online.target pigeon-enroll.service pigeon-mesh.service
-Wants=network-online.target
-
-[Service]
-ExecStart=/opt/pigeon/bin/pigeon-template --config=/etc/pigeon/template.hcl
-Restart=on-failure
-RestartSec=5

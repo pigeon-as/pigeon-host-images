@@ -2,7 +2,7 @@
 set -eu
 # Worker first-boot: LUKS setup + secret enrollment + config rendering via ConfigDrive user_data.
 
-ENROLL_URL="${file.secrets.vars.enroll_url}"
+ENROLL_URL="${file.enroll.vars.enroll_url}"
 ENROLL_TOKEN="${exec.enroll_token}"
 ENROLL_CERT="${exec.enroll_cert}"
 
@@ -22,10 +22,14 @@ pigeon-enroll claim \
   -token "$ENROLL_TOKEN" \
   -tls "$CERT_FILE" \
   -scope worker \
-  -output /encrypted/pigeon/secrets.json
+  -output /encrypted/pigeon/enroll.json
+
+# Generate unique hostname and promote to FQDN — pigeon-mesh derives overlay address from it.
+PETNAME=$(pigeon-petname)
+hostnamectl set-hostname "$${PETNAME}.worker.${file.enroll.vars.datacenter}.${file.enroll.vars.region}.${file.enroll.vars.domain}"
 
 # Render configs, extract CAs, generate leaf certs — all in one pass.
-pigeon-template --once --config=/etc/pigeon/template.hcl
+pigeon-template --once --config=/etc/pigeon/bootstrap.tmpl.hcl
 
 # Start services that were waiting for rendered configs.
 # vault-agent issues Nomad TLS cert → nomad-cert.path detects it → starts nomad.
