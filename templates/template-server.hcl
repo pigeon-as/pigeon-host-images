@@ -156,7 +156,7 @@ template {
   source      = "/etc/pigeon/infra.zone.tpl"
   destination = "/etc/unbound/zones/infra.zone"
   perms       = "0644"
-  command     = "unbound-control auth_zone_reload ${file.enroll.vars.domain}"
+  command     = "unbound-control auth_zone_reload $${file.enroll.vars.domain}"
 }
 
 # --- Setup worker script (uses exec sources for token rotation) ---
