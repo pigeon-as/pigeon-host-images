@@ -1,5 +1,5 @@
-source "file" "secrets" {
-  path = "/encrypted/pigeon/secrets.json"
+source "file" "enroll" {
+  path = "/encrypted/pigeon/enroll.json"
 }
 
 source "exec" "peers" {
@@ -8,25 +8,25 @@ source "exec" "peers" {
 }
 
 source "exec" "enroll_token" {
-  command  = "pigeon-enroll generate-token -config=/encrypted/pigeon/enroll.hcl"
+  command  = "pigeon-enroll generate-token -config=/encrypted/pigeon/enroll-server.hcl"
   interval = "10m"
 }
 
 source "exec" "enroll_cert" {
-  command  = "pigeon-enroll generate-cert -base64 -bundle - -config=/encrypted/pigeon/enroll.hcl -ttl 1h"
+  command  = "pigeon-enroll generate-cert -base64 -bundle - -config=/encrypted/pigeon/enroll-server.hcl -ttl 1h"
   interval = "30m"
 }
 
 # --- Mesh CA (pigeon-mesh reads these directly) ---
 
 template {
-  content     = "$${file.secrets.ca.mesh.cert_pem}"
+  content     = "$${file.enroll.ca.mesh.cert_pem}"
   destination = "/encrypted/pigeon/mesh-ca.crt"
   perms       = "0600"
 }
 
 template {
-  content     = "$${file.secrets.ca.mesh.private_key_pem}"
+  content     = "$${file.enroll.ca.mesh.private_key_pem}"
   destination = "/encrypted/pigeon/mesh-ca.key"
   perms       = "0600"
 }
@@ -35,8 +35,8 @@ template {
 
 template {
   content     = <<-EOT
-$${file.secrets.ca.vault.cert_pem}
-$${file.secrets.ca.vault.private_key_pem}
+$${file.enroll.ca.vault.cert_pem}
+$${file.enroll.ca.vault.private_key_pem}
 EOT
   destination = "/encrypted/tls/vault/ca.pem"
   perms       = "0600"
@@ -59,8 +59,8 @@ EOT
 
 template {
   content     = <<-EOT
-$${file.secrets.ca.consul.cert_pem}
-$${file.secrets.ca.consul.private_key_pem}
+$${file.enroll.ca.consul.cert_pem}
+$${file.enroll.ca.consul.private_key_pem}
 EOT
   destination = "/encrypted/tls/consul/ca.pem"
   perms       = "0600"
@@ -69,7 +69,7 @@ EOT
       set -e
       pigeon-enroll generate-cert -from-ca /encrypted/tls/consul/ca.pem \
         -cn $(hostname) \
-        -dns localhost -dns server.$${file.secrets.vars.datacenter}.internal \
+        -dns localhost -dns server.$${file.enroll.vars.datacenter}.internal \
         -ip 127.0.0.1 -ttl 720h \
         -cert /encrypted/tls/consul/cert.pem \
         -key /encrypted/tls/consul/key.pem \
@@ -83,15 +83,15 @@ EOT
 
 template {
   content     = <<-EOT
-$${file.secrets.ca.nomad.cert_pem}
-$${file.secrets.ca.nomad.private_key_pem}
+$${file.enroll.ca.nomad.cert_pem}
+$${file.enroll.ca.nomad.private_key_pem}
 EOT
   destination = "/encrypted/tls/nomad/ca.pem"
   perms       = "0600"
   command     = <<-EOC
     pigeon-enroll generate-cert -from-ca /encrypted/tls/nomad/ca.pem \
       -cn $(hostname) \
-      -dns localhost -dns server.$${file.secrets.vars.region}.nomad \
+      -dns localhost -dns server.$${file.enroll.vars.region}.nomad \
       -ip 127.0.0.1 -ttl 720h \
       -cert /encrypted/tls/nomad/cert.pem \
       -key /encrypted/tls/nomad/key.pem \
@@ -156,7 +156,7 @@ template {
   source      = "/etc/pigeon/infra.zone.tpl"
   destination = "/etc/unbound/zones/infra.zone"
   perms       = "0644"
-  command     = "unbound-control auth_zone_reload ${file.secrets.vars.domain}"
+  command     = "unbound-control auth_zone_reload ${file.enroll.vars.domain}"
 }
 
 # --- Setup worker script (uses exec sources for token rotation) ---

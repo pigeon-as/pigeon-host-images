@@ -1,5 +1,5 @@
-source "file" "secrets" {
-  path = "/encrypted/pigeon/secrets.json"
+source "file" "enroll" {
+  path = "/encrypted/pigeon/enroll.json"
 }
 
 source "exec" "peers" {
@@ -10,13 +10,13 @@ source "exec" "peers" {
 # --- Mesh CA (pigeon-mesh reads these directly) ---
 
 template {
-  content     = "$${file.secrets.ca.mesh.cert_pem}"
+  content     = "$${file.enroll.ca.mesh.cert_pem}"
   destination = "/encrypted/pigeon/mesh-ca.crt"
   perms       = "0600"
 }
 
 template {
-  content     = "$${file.secrets.ca.mesh.private_key_pem}"
+  content     = "$${file.enroll.ca.mesh.private_key_pem}"
   destination = "/encrypted/pigeon/mesh-ca.key"
   perms       = "0600"
 }
@@ -24,7 +24,7 @@ template {
 # --- Vault CA cert (workers verify server TLS, no leaf cert needed) ---
 
 template {
-  content     = "$${file.secrets.ca.vault.cert_pem}"
+  content     = "$${file.enroll.ca.vault.cert_pem}"
   destination = "/encrypted/tls/vault/ca.crt"
   perms       = "0644"
 }
@@ -32,7 +32,7 @@ template {
 # --- Consul CA cert (auto_encrypt handles leaf certs) ---
 
 template {
-  content     = "$${file.secrets.ca.consul.cert_pem}"
+  content     = "$${file.enroll.ca.consul.cert_pem}"
   destination = "/encrypted/tls/consul/ca.crt"
   perms       = "0644"
 }
@@ -40,7 +40,7 @@ template {
 # --- Nomad CA cert (trust only — vault-agent issues leaf certs from Vault PKI) ---
 
 template {
-  content     = "$${file.secrets.ca.nomad.cert_pem}"
+  content     = "$${file.enroll.ca.nomad.cert_pem}"
   destination = "/encrypted/tls/nomad/ca.crt"
   perms       = "0644"
 }
@@ -48,19 +48,19 @@ template {
 # --- Auth CA cert + leaf cert (server-issued during claim, for vault-agent cert auth) ---
 
 template {
-  content     = "$${file.secrets.ca.auth.cert_pem}"
+  content     = "$${file.enroll.ca.auth.cert_pem}"
   destination = "/encrypted/tls/auth/ca.crt"
   perms       = "0644"
 }
 
 template {
-  content     = "$${file.secrets.certs.auth_worker.cert_pem}"
+  content     = "$${file.enroll.certs.auth_worker.cert_pem}"
   destination = "/encrypted/tls/auth/cert.pem"
   perms       = "0600"
 }
 
 template {
-  content     = "$${file.secrets.certs.auth_worker.key_pem}"
+  content     = "$${file.enroll.certs.auth_worker.key_pem}"
   destination = "/encrypted/tls/auth/key.pem"
   perms       = "0600"
 }
@@ -108,7 +108,7 @@ template {
   source      = "/etc/pigeon/infra.zone.tpl"
   destination = "/etc/unbound/zones/infra.zone"
   perms       = "0644"
-  command     = "unbound-control auth_zone_reload ${file.secrets.vars.domain}"
+  command     = "unbound-control auth_zone_reload ${file.enroll.vars.domain}"
 }
 
 template {

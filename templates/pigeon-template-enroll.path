@@ -2,7 +2,7 @@
 Description=Watch for pigeon secrets file
 
 [Path]
-PathExists=/encrypted/pigeon/secrets.json
+PathExists=/encrypted/pigeon/enroll.json
 Unit=pigeon-template.service
 
 [Install]

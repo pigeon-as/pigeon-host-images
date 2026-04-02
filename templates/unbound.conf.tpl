@@ -17,7 +17,7 @@ server:
 # Authoritative zone for infrastructure DNS.
 # Zone file rendered by pigeon-template. Starts empty if file missing.
 auth-zone:
-    name: "${file.secrets.vars.domain}"
+    name: "${file.enroll.vars.domain}"
     zonefile: "/etc/unbound/zones/infra.zone"
 
 # Forward .internal to Consul DNS

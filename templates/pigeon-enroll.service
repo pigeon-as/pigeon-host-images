@@ -4,10 +4,10 @@ After=network-online.target
 Wants=network-online.target
 Before=pigeon-template.service vault.service consul.service nomad.service pigeon-mesh.service pigeon-fence.service
 ConditionPathExists=/encrypted/pigeon/enrollment-key
-ConditionPathExists=/encrypted/pigeon/enroll.hcl
+ConditionPathExists=/encrypted/pigeon/enroll-server.hcl
 
 [Service]
-ExecStart=/opt/pigeon/bin/pigeon-enroll server -config=/encrypted/pigeon/enroll.hcl
+ExecStart=/opt/pigeon/bin/pigeon-enroll server -config=/encrypted/pigeon/enroll-server.hcl
 ExecStartPost=/opt/pigeon/bin/pigeon-template --once --config=/etc/pigeon/template.hcl
 Restart=on-failure
 RestartSec=5

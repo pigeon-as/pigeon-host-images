@@ -94,8 +94,8 @@ build {
   }
 
   provisioner "file" {
-    source      = "templates/pigeon-template-secrets.path"
-    destination = "/etc/systemd/system/pigeon-template-secrets.path"
+    source      = "templates/pigeon-template-enroll.path"
+    destination = "/etc/systemd/system/pigeon-template-enroll.path"
   }
 
   provisioner "file" {
@@ -218,7 +218,7 @@ build {
       "systemctl enable pigeon-mesh",
       "systemctl enable pigeon-fence",
       "systemctl enable pigeon-enroll",
-      "systemctl enable pigeon-template-secrets.path",
+      "systemctl enable pigeon-template-enroll.path",
       "systemctl enable pigeon-enroll-actions",
       "systemctl enable vault",
       "systemctl enable consul",
