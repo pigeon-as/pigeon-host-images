@@ -17,7 +17,7 @@ template {
 }
 
 template {
-  content     = "$${file.enroll.certs.mesh_server.private_key_pem}"
+  content     = "$${file.enroll.certs.mesh_server.key_pem}"
   destination = "/encrypted/pigeon/mesh-key.pem"
   perms       = "0600"
 }

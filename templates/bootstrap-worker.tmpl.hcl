@@ -44,6 +44,8 @@ template {
   content     = "$${file.enroll.jwts.consul_auto_config}"
   destination = "/encrypted/consul/intro-token.jwt"
   perms       = "0600"
+  user        = "consul"
+  group       = "consul"
 }
 
 # --- Nomad CA cert (trust only — vault-agent issues leaf certs from Vault PKI) ---
