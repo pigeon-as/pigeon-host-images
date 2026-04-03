@@ -12,6 +12,11 @@ ENROLL_CERT="${exec.enroll_cert}"
 
 bash /usr/local/bin/configure-luks.sh
 
+# Generate unique hostname BEFORE claim so -subject = hostname.
+PETNAME=$(pigeon-petname)
+HOSTNAME="$${PETNAME}.worker.${file.enroll.vars.datacenter}.${file.enroll.vars.region}.${file.enroll.vars.domain}"
+hostnamectl set-hostname "$$HOSTNAME"
+
 # Write client cert bundle to temp file for mTLS claim.
 CERT_FILE=$(mktemp)
 trap 'rm -f "$CERT_FILE"' EXIT
@@ -22,11 +27,8 @@ pigeon-enroll claim \
   -token "$ENROLL_TOKEN" \
   -tls "$CERT_FILE" \
   -scope worker \
+  -subject "$$HOSTNAME" \
   -output /encrypted/pigeon/enroll.json
-
-# Generate unique hostname and promote to FQDN — pigeon-mesh derives overlay address from it.
-PETNAME=$(pigeon-petname)
-hostnamectl set-hostname "$${PETNAME}.worker.${file.enroll.vars.datacenter}.${file.enroll.vars.region}.${file.enroll.vars.domain}"
 
 # Render configs, extract CAs, generate leaf certs — all in one pass.
 pigeon-template --once --config=/etc/pigeon/bootstrap.tmpl.hcl

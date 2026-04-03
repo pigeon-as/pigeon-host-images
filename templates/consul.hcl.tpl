@@ -13,8 +13,9 @@ addresses {
 
 retry_join = ["servers.${vars.datacenter}.${vars.domain}"]
 
-auto_encrypt {
-  tls = true
+auto_config {
+  enabled          = true
+  intro_token_file = "/encrypted/consul/intro-token.jwt"
 }
 
 encrypt = "${secrets.consul_encrypt}"
@@ -22,10 +23,6 @@ encrypt = "${secrets.consul_encrypt}"
 acl {
   enabled        = true
   default_policy = "deny"
-
-  tokens {
-    agent = "${secrets.consul_agent_token}"
-  }
 }
 
 tls {

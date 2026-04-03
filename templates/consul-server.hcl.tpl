@@ -16,8 +16,16 @@ retry_join = ["servers.${vars.datacenter}.${vars.domain}"]
 
 retry_join_wan = ["servers.${vars.domain}"]
 
-auto_encrypt {
-  allow_tls = true
+auto_config {
+  authorization {
+    enabled = true
+    static {
+      jwt_validation_pub_keys = ["${jwt_keys.consul_auto_config}"]
+      bound_issuer            = "pigeon-enroll"
+      bound_audiences         = ["consul-auto-config"]
+      claim_assertions        = ["value.sub == \"$${node}\""]
+    }
+  }
 }
 
 encrypt = "${secrets.consul_encrypt}"

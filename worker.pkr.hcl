@@ -101,7 +101,7 @@ build {
   }
 
   provisioner "file" {
-    source      = "templates/mesh.json.tpl"
+    source      = "templates/mesh-worker.json.tpl"
     destination = "/etc/pigeon/mesh.json.tpl"
   }
 
