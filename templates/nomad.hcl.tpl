@@ -1,5 +1,5 @@
-datacenter = "${vars.datacenter}"
-region     = "${vars.region}"
+datacenter = "${file.enroll.vars.datacenter}"
+region     = "${file.enroll.vars.region}"
 
 client {
   enabled = true
@@ -20,11 +20,11 @@ addresses {
   serf = "{{ GetInterfaceIP \"wg0\" }}"
 }
 
-servers = ["servers.${vars.datacenter}.${vars.domain}"]
+servers = ["servers.${file.enroll.vars.datacenter}.${file.enroll.vars.domain}"]
 
 consul {
   address = "127.0.0.1:8500"
-  token   = "${secrets.consul_agent_token}"
+  token   = "${file.enroll.secrets.consul_agent_token}"
   service_identity {
     aud = ["consul.io"]
     ttl = "1h"

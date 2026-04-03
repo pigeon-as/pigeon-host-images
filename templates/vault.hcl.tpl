@@ -10,15 +10,15 @@ listener "tcp" {
 storage "consul" {
   address = "127.0.0.1:8500"
   path    = "vault/"
-  token   = "${secrets.consul_bootstrap_token}"
+  token   = "${file.enroll.secrets.consul_bootstrap_token}"
 }
 
 seal "azurekeyvault" {
-  tenant_id     = "${vars.seal_tenant_id}"
-  client_id     = "${vars.seal_client_id}"
-  client_secret = "${vars.seal_client_secret}"
-  vault_name    = "${vars.seal_key_vault_name}"
-  key_name      = "${vars.seal_key_name}"
+  tenant_id     = "${file.enroll.vars.seal_tenant_id}"
+  client_id     = "${file.enroll.vars.seal_client_id}"
+  client_secret = "${file.enroll.vars.seal_client_secret}"
+  vault_name    = "${file.enroll.vars.seal_key_vault_name}"
+  key_name      = "${file.enroll.vars.seal_key_name}"
 }
 
 disable_mlock = false
