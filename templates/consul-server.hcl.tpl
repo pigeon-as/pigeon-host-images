@@ -1,4 +1,4 @@
-datacenter = "${vars.datacenter}"
+datacenter = "${file.enroll.vars.datacenter}"
 domain     = "internal"
 
 server           = true
@@ -12,15 +12,23 @@ addresses {
   dns   = "127.0.0.1 {{ GetInterfaceIP \"wg0\" }}"
 }
 
-retry_join = ["servers.${vars.datacenter}.${vars.domain}"]
+retry_join = ["servers.${file.enroll.vars.datacenter}.${file.enroll.vars.domain}"]
 
-retry_join_wan = ["servers.${vars.domain}"]
+retry_join_wan = ["servers.${file.enroll.vars.domain}"]
 
-auto_encrypt {
-  allow_tls = true
+auto_config {
+  authorization {
+    enabled = true
+    static {
+      jwt_validation_pub_keys = ["${file.enroll.jwt_keys.consul_auto_config}"]
+      bound_issuer            = "pigeon-enroll"
+      bound_audiences         = ["consul-auto-config"]
+      claim_assertions        = ["value.sub == \"$${node}\""]
+    }
+  }
 }
 
-encrypt = "${secrets.consul_encrypt}"
+encrypt = "${file.enroll.secrets.consul_encrypt}"
 
 acl {
   enabled                  = true
@@ -28,8 +36,8 @@ acl {
   enable_token_persistence = true
 
   tokens {
-    initial_management = "${secrets.consul_bootstrap_token}"
-    agent              = "${secrets.consul_bootstrap_token}"
+    initial_management = "${file.enroll.secrets.consul_bootstrap_token}"
+    agent              = "${file.enroll.secrets.consul_bootstrap_token}"
   }
 }
 

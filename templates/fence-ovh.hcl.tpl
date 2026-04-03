@@ -1,8 +1,8 @@
 provider "ovh" {
   endpoint           = "ovh-eu"
-  application_key    = "${vars.ovh_application_key}"
-  application_secret = "${vars.ovh_application_secret}"
-  consumer_key       = "${vars.ovh_consumer_key}"
+  application_key    = "${file.enroll.vars.ovh_application_key}"
+  application_secret = "${file.enroll.vars.ovh_application_secret}"
+  consumer_key       = "${file.enroll.vars.ovh_consumer_key}"
 }
 
 data "ovh_ips" "servers" {}

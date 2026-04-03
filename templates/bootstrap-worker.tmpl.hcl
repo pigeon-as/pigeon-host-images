@@ -2,7 +2,7 @@ source "file" "enroll" {
   path = "/encrypted/pigeon/enroll.json"
 }
 
-# --- Mesh CA (pigeon-mesh reads these directly) ---
+# --- Mesh CA cert (for peer verification) + pre-issued leaf cert ---
 
 template {
   content     = "$${file.enroll.ca.mesh.cert_pem}"
@@ -11,8 +11,14 @@ template {
 }
 
 template {
-  content     = "$${file.enroll.ca.mesh.private_key_pem}"
-  destination = "/encrypted/pigeon/mesh-ca.key"
+  content     = "$${file.enroll.certs.mesh_worker.cert_pem}"
+  destination = "/encrypted/pigeon/mesh-cert.pem"
+  perms       = "0600"
+}
+
+template {
+  content     = "$${file.enroll.certs.mesh_worker.key_pem}"
+  destination = "/encrypted/pigeon/mesh-key.pem"
   perms       = "0600"
 }
 
@@ -24,12 +30,22 @@ template {
   perms       = "0644"
 }
 
-# --- Consul CA cert (auto_encrypt handles leaf certs) ---
+# --- Consul CA cert (auto_config handles leaf certs) ---
 
 template {
   content     = "$${file.enroll.ca.consul.cert_pem}"
   destination = "/encrypted/tls/consul/ca.crt"
   perms       = "0644"
+}
+
+# --- Consul auto_config intro token (JWT for joining the cluster) ---
+
+template {
+  content     = "$${file.enroll.jwts.consul_auto_config}"
+  destination = "/encrypted/consul/intro-token.jwt"
+  perms       = "0600"
+  user        = "consul"
+  group       = "consul"
 }
 
 # --- Nomad CA cert (trust only — vault-agent issues leaf certs from Vault PKI) ---

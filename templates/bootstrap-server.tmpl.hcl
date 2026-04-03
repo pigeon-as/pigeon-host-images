@@ -2,7 +2,7 @@ source "file" "enroll" {
   path = "/encrypted/pigeon/enroll.json"
 }
 
-# --- Mesh CA (pigeon-mesh reads these directly) ---
+# --- Mesh TLS (CA cert for verification + pre-issued leaf cert) ---
 
 template {
   content     = "$${file.enroll.ca.mesh.cert_pem}"
@@ -11,8 +11,14 @@ template {
 }
 
 template {
-  content     = "$${file.enroll.ca.mesh.private_key_pem}"
-  destination = "/encrypted/pigeon/mesh-ca.key"
+  content     = "$${file.enroll.certs.mesh_server.cert_pem}"
+  destination = "/encrypted/pigeon/mesh-cert.pem"
+  perms       = "0600"
+}
+
+template {
+  content     = "$${file.enroll.certs.mesh_server.key_pem}"
+  destination = "/encrypted/pigeon/mesh-key.pem"
   perms       = "0600"
 }
 
