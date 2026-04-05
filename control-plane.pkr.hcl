@@ -47,6 +47,23 @@ build {
     destination = "/etc/kernel/cmdline"
   }
 
+  provisioner "file" {
+    source      = "scripts/pigeon-verify-hook"
+    destination = "/etc/initramfs-tools/hooks/pigeon-verify"
+  }
+
+  provisioner "file" {
+    source      = "scripts/pigeon-verify"
+    destination = "/etc/initramfs-tools/scripts/local-bottom/pigeon-verify"
+  }
+
+  provisioner "shell" {
+    inline = [
+      "chmod 0755 /etc/initramfs-tools/hooks/pigeon-verify",
+      "chmod 0755 /etc/initramfs-tools/scripts/local-bottom/pigeon-verify",
+    ]
+  }
+
   provisioner "shell" {
     script = "scripts/setup-kernel.sh"
   }

@@ -48,11 +48,12 @@ echo -n "$PASSPHRASE" | cryptsetup luksFormat --type luks2 \
 echo -n "$PASSPHRASE" | cryptsetup open --type luks2 "$DEVICE" encrypted -
 
 # Enroll TPM2 so unlock is automatic on boot
-# PCR 7 = Secure Boot policy (static baseline)
+# PCR 7  = Secure Boot policy (static baseline)
 # PCR 11 = UKI kernel hash (systemd-stub measurement) — detects kernel/initrd tampering
+# PCR 14 = pigeon-verify binary integrity (initrd measures critical binaries before LUKS)
 echo -n "$PASSPHRASE" | systemd-cryptenroll \
   --tpm2-device=auto \
-  --tpm2-pcrs="7+11" \
+  --tpm2-pcrs="7+11+14" \
   "$DEVICE"
 
 # Remove passphrase slot — TPM2 is the only unlock method
