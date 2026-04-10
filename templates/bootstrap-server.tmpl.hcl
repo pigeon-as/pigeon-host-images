@@ -28,21 +28,24 @@ template {
   content     = "$${file.enroll.ca.vault.cert_pem}"
   destination = "/encrypted/tls/vault/ca.crt"
   perms       = "0600"
-  command     = "chown vault:vault /encrypted/tls/vault/ca.crt"
+  user        = "vault"
+  group       = "vault"
 }
 
 template {
   content     = "$${file.enroll.certs.vault_server.cert_pem}"
   destination = "/encrypted/tls/vault/cert.pem"
   perms       = "0600"
-  command     = "chown vault:vault /encrypted/tls/vault/cert.pem"
+  user        = "vault"
+  group       = "vault"
 }
 
 template {
   content     = "$${file.enroll.certs.vault_server.key_pem}"
   destination = "/encrypted/tls/vault/key.pem"
   perms       = "0600"
-  command     = "chown vault:vault /encrypted/tls/vault/key.pem"
+  user        = "vault"
+  group       = "vault"
 }
 
 # --- Consul TLS (CA cert + pre-issued leaf cert from enroll) ---
@@ -51,21 +54,24 @@ template {
   content     = "$${file.enroll.ca.consul.cert_pem}"
   destination = "/encrypted/tls/consul/ca.crt"
   perms       = "0600"
-  command     = "chown consul:consul /encrypted/tls/consul/ca.crt"
+  user        = "consul"
+  group       = "consul"
 }
 
 template {
   content     = "$${file.enroll.certs.consul_server.cert_pem}"
   destination = "/encrypted/tls/consul/cert.pem"
   perms       = "0600"
-  command     = "chown consul:consul /encrypted/tls/consul/cert.pem"
+  user        = "consul"
+  group       = "consul"
 }
 
 template {
   content     = "$${file.enroll.certs.consul_server.key_pem}"
   destination = "/encrypted/tls/consul/key.pem"
   perms       = "0600"
-  command     = "chown consul:consul /encrypted/tls/consul/key.pem"
+  user        = "consul"
+  group       = "consul"
 }
 
 # --- Nomad TLS (CA cert + pre-issued leaf cert from enroll) ---
