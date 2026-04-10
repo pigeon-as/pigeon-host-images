@@ -206,6 +206,46 @@ build {
   }
 
   provisioner "file" {
+    source      = "templates/vault-agent-server.hcl"
+    destination = "/etc/pigeon/vault-agent.hcl"
+  }
+
+  provisioner "file" {
+    source      = "templates/vault-agent-server.service"
+    destination = "/etc/systemd/system/vault-agent.service"
+  }
+
+  provisioner "file" {
+    source      = "templates/consul-server-cert.ctmpl"
+    destination = "/etc/pigeon/consul-server-cert.ctmpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/consul-server-key.ctmpl"
+    destination = "/etc/pigeon/consul-server-key.ctmpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/nomad-server-cert.ctmpl"
+    destination = "/etc/pigeon/nomad-server-cert.ctmpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/nomad-server-key.ctmpl"
+    destination = "/etc/pigeon/nomad-server-key.ctmpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/vault-server-cert.ctmpl"
+    destination = "/etc/pigeon/vault-server-cert.ctmpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/vault-server-key.ctmpl"
+    destination = "/etc/pigeon/vault-server-key.ctmpl"
+  }
+
+  provisioner "file" {
     source      = "templates/nftables.conf"
     destination = "/etc/nftables.conf"
   }
@@ -248,6 +288,7 @@ build {
       "systemctl enable pigeon-template-bootstrap.path",
       "systemctl enable pigeon-template-reconcile",
       "systemctl enable pigeon-enroll-actions",
+      "systemctl enable vault-agent",
       "systemctl enable vault",
       "systemctl enable consul",
       "systemctl enable nomad",

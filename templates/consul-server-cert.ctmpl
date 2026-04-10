@@ -1,0 +1,5 @@
+{{ $cn := printf "common_name=%s" (env "HOSTNAME") -}}
+{{ $dns := printf "alt_names=server.%s.internal,localhost" (env "PIGEON_DATACENTER") -}}
+{{ with pkiCert "pki_consul/issue/consul-server" $cn "ttl=24h" $dns "ip_sans=127.0.0.1" -}}
+{{ .Cert }}{{ .CA }}
+{{- end }}
