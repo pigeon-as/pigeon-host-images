@@ -8,6 +8,7 @@ Type=oneshot
 ExecStart=/opt/pigeon/bin/pigeon-template --once --config=/etc/pigeon/bootstrap.tmpl.hcl
 NoNewPrivileges=yes
 ProtectSystem=full
+ReadWritePaths=/etc/resolv.conf /etc/unbound/
 ProtectHome=yes
 PrivateTmp=yes
 PrivateDevices=yes

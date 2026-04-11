@@ -123,6 +123,7 @@ PIGEON_REGION=$${file.enroll.vars.region}
 EOT
   destination = "/encrypted/pigeon/vault-agent.env"
   perms       = "0600"
+  command     = "systemctl start vault-agent-server"
 }
 
 # --- Service configs ---
