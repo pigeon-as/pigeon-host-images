@@ -28,7 +28,7 @@ template {
   source      = "/etc/pigeon/consul-server-cert.ctmpl"
   destination = "/encrypted/tls/consul/cert.pem"
   perms       = 0640
-  command     = "chown consul:consul /encrypted/tls/consul/cert.pem /encrypted/tls/consul/key.pem; consul reload 2>/dev/null || true"
+  command     = "chown consul:consul /encrypted/tls/consul/cert.pem /encrypted/tls/consul/key.pem; systemctl reload consul 2>/dev/null || true"
 }
 
 # Nomad server cert
