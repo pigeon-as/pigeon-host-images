@@ -28,7 +28,7 @@ template {
   source      = "/etc/pigeon/consul-server-cert.ctmpl"
   destination = "/encrypted/tls/consul/cert.pem"
   perms       = 0640
-  command     = "chown consul:consul /encrypted/tls/consul/{cert.pem,key.pem} && systemctl reload consul 2>/dev/null || true"
+  command     = "chown consul:consul /encrypted/tls/consul/cert.pem /encrypted/tls/consul/key.pem && systemctl reload consul 2>/dev/null || true"
 }
 
 # Nomad server cert
@@ -56,5 +56,5 @@ template {
   source      = "/etc/pigeon/vault-server-cert.ctmpl"
   destination = "/encrypted/tls/vault/cert.pem"
   perms       = 0640
-  command     = "chown vault:vault /encrypted/tls/vault/{cert.pem,key.pem} && systemctl reload vault 2>/dev/null || true"
+  command     = "chown vault:vault /encrypted/tls/vault/cert.pem /encrypted/tls/vault/key.pem && systemctl reload vault 2>/dev/null || true"
 }
