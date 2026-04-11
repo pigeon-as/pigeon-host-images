@@ -4,6 +4,8 @@ Wants=network-online.target
 After=network-online.target pigeon-mesh.service consul.service vault.service
 Requires=pigeon-mesh.service consul.service
 ConditionPathExists=/encrypted/tls/auth/cert.pem
+ConditionPathExists=/encrypted/tls/auth/key.pem
+ConditionPathExists=/encrypted/pigeon/vault-agent.env
 
 [Service]
 EnvironmentFile=/encrypted/pigeon/vault-agent.env

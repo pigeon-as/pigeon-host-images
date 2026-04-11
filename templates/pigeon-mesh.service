@@ -9,5 +9,14 @@ ExecStart=/opt/pigeon/bin/pigeon-mesh --config=/encrypted/pigeon/mesh.json
 Restart=on-failure
 RestartSec=5
 
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+ReadWritePaths=/var/lib/pigeon-mesh /run/pigeon-mesh
+ReadOnlyPaths=/encrypted
+CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_RAW
+AmbientCapabilities=CAP_NET_ADMIN CAP_NET_RAW
+
 [Install]
 WantedBy=multi-user.target

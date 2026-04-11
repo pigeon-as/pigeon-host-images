@@ -76,6 +76,7 @@ build {
       "scripts/setup-pigeon.sh",
       "scripts/setup-pigeon-mesh.sh",
       "scripts/setup-pigeon-enroll.sh",
+      "scripts/setup-ek-ca.sh",
       "scripts/setup-pigeon-template.sh",
       "scripts/setup-pigeon-fence.sh",
       "scripts/setup-vault.sh",
@@ -273,6 +274,11 @@ build {
   provisioner "file" {
     source      = "scripts/configure-luks.sh"
     destination = "/usr/local/bin/configure-luks.sh"
+  }
+
+  provisioner "file" {
+    source      = "scripts/extract-ek-ca.sh"
+    destination = "/usr/local/bin/extract-ek-ca.sh"
   }
 
   # Service state management — single source of truth.
