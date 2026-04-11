@@ -10,6 +10,14 @@ ConditionPathExists=/encrypted/pigeon/enroll-server.hcl
 ExecStart=/opt/pigeon/bin/pigeon-enroll server -config=/encrypted/pigeon/enroll-server.hcl
 Restart=on-failure
 RestartSec=5
+NoNewPrivileges=yes
+ProtectSystem=full
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+LimitCORE=0
 
 [Install]
 WantedBy=multi-user.target

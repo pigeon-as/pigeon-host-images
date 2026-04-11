@@ -17,6 +17,7 @@ ReadWritePaths=/var/lib/pigeon-mesh /run/pigeon-mesh
 ReadOnlyPaths=/encrypted
 CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_RAW
 AmbientCapabilities=CAP_NET_ADMIN CAP_NET_RAW
+LimitCORE=0
 
 [Install]
 WantedBy=multi-user.target

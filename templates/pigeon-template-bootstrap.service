@@ -6,3 +6,11 @@ Wants=network-online.target
 [Service]
 Type=oneshot
 ExecStart=/opt/pigeon/bin/pigeon-template --once --config=/etc/pigeon/bootstrap.tmpl.hcl
+NoNewPrivileges=yes
+ProtectSystem=full
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+LimitCORE=0
