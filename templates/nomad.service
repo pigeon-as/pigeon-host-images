@@ -5,6 +5,8 @@ Wants=network-online.target pigeon-mesh.service
 After=network-online.target pigeon-mesh.service consul.service vault-agent.service
 ConditionFileNotEmpty=/encrypted/nomad/nomad.hcl
 ConditionPathExists=/encrypted/tls/nomad/cert.pem
+StartLimitIntervalSec=60
+StartLimitBurst=3
 
 [Service]
 Type=notify
@@ -18,6 +20,11 @@ Restart=on-failure
 RestartSec=5
 TasksMax=infinity
 OOMScoreAdjust=-1000
+LimitCORE=0
+ProtectSystem=full
+ProtectHome=yes
+PrivateTmp=yes
+TimeoutStopSec=30
 
 [Install]
 WantedBy=multi-user.target

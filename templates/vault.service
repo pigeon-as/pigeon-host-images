@@ -19,6 +19,8 @@ SecureBits=keep-caps
 AmbientCapabilities=CAP_IPC_LOCK
 CapabilityBoundingSet=CAP_SYSLOG CAP_IPC_LOCK
 NoNewPrivileges=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
 ExecStart=/usr/bin/vault server -config=/encrypted/vault
 ExecReload=/bin/kill -HUP $MAINPID
 KillMode=process

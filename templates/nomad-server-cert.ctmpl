@@ -1,0 +1,5 @@
+{{ $cn := printf "common_name=%s" (env "HOSTNAME") -}}
+{{ $dns := printf "alt_names=server.%s.nomad,localhost" (env "PIGEON_REGION") -}}
+{{ with pkiCert "pki_nomad/issue/nomad-server" $cn "ttl=24h" $dns "ip_sans=127.0.0.1" -}}
+{{ .Cert }}{{ .CA }}
+{{- end }}

@@ -22,11 +22,18 @@ source "qemu" "control-plane" {
   format           = "qcow2"
   headless         = true
 
-  ssh_username = "root"
-  ssh_password = "packer"
-  ssh_timeout  = "10m"
+  accelerator = "kvm"
+  cpus        = 2
+  memory      = 2048
+  boot_wait   = "10s"
 
-  shutdown_command = "shutdown -P now"
+  ssh_username           = "root"
+  ssh_password           = "packer"
+  ssh_timeout            = "10m"
+  ssh_wait_timeout       = "1h"
+  ssh_handshake_attempts = 500
+
+  shutdown_command = "sudo -S shutdown -P now"
   output_directory = "build/control-plane"
   vm_name          = "control-plane.qcow2"
 
@@ -34,8 +41,7 @@ source "qemu" "control-plane" {
   cd_label = "cidata"
 
   qemuargs = [
-    ["-serial", "stdio"],
-    ["-m", "1024"],
+    ["-serial", "file:build/serial-control-plane.log"],
   ]
 }
 
@@ -45,6 +51,23 @@ build {
   provisioner "file" {
     source      = "templates/cmdline"
     destination = "/etc/kernel/cmdline"
+  }
+
+  provisioner "file" {
+    source      = "scripts/pigeon-verify-hook"
+    destination = "/etc/initramfs-tools/hooks/pigeon-verify"
+  }
+
+  provisioner "file" {
+    source      = "scripts/pigeon-verify"
+    destination = "/etc/initramfs-tools/scripts/local-bottom/pigeon-verify"
+  }
+
+  provisioner "shell" {
+    inline = [
+      "chmod 0755 /etc/initramfs-tools/hooks/pigeon-verify",
+      "chmod 0755 /etc/initramfs-tools/scripts/local-bottom/pigeon-verify",
+    ]
   }
 
   provisioner "shell" {
@@ -59,6 +82,7 @@ build {
       "scripts/setup-pigeon.sh",
       "scripts/setup-pigeon-mesh.sh",
       "scripts/setup-pigeon-enroll.sh",
+      "scripts/setup-ek-ca.sh",
       "scripts/setup-pigeon-template.sh",
       "scripts/setup-pigeon-fence.sh",
       "scripts/setup-vault.sh",
@@ -189,6 +213,46 @@ build {
   }
 
   provisioner "file" {
+    source      = "templates/vault-agent-server.hcl"
+    destination = "/etc/pigeon/vault-agent.hcl"
+  }
+
+  provisioner "file" {
+    source      = "templates/vault-agent-server.service"
+    destination = "/etc/systemd/system/vault-agent.service"
+  }
+
+  provisioner "file" {
+    source      = "templates/consul-server-cert.ctmpl"
+    destination = "/etc/pigeon/consul-server-cert.ctmpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/consul-server-key.ctmpl"
+    destination = "/etc/pigeon/consul-server-key.ctmpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/nomad-server-cert.ctmpl"
+    destination = "/etc/pigeon/nomad-server-cert.ctmpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/nomad-server-key.ctmpl"
+    destination = "/etc/pigeon/nomad-server-key.ctmpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/vault-server-cert.ctmpl"
+    destination = "/etc/pigeon/vault-server-cert.ctmpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/vault-server-key.ctmpl"
+    destination = "/etc/pigeon/vault-server-key.ctmpl"
+  }
+
+  provisioner "file" {
     source      = "templates/nftables.conf"
     destination = "/etc/nftables.conf"
   }
@@ -218,6 +282,11 @@ build {
     destination = "/usr/local/bin/configure-luks.sh"
   }
 
+  provisioner "file" {
+    source      = "scripts/extract-ek-ca.sh"
+    destination = "/usr/local/bin/extract-ek-ca.sh"
+  }
+
   # Service state management — single source of truth.
   # apt packages auto-enable during install; this block is the
   # authoritative list of what runs on this image.
@@ -231,6 +300,7 @@ build {
       "systemctl enable pigeon-template-bootstrap.path",
       "systemctl enable pigeon-template-reconcile",
       "systemctl enable pigeon-enroll-actions",
+      "systemctl enable vault-agent",
       "systemctl enable vault",
       "systemctl enable consul",
       "systemctl enable nomad",

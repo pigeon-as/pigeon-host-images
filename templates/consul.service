@@ -4,6 +4,8 @@ Documentation=https://developer.hashicorp.com/consul
 Wants=network-online.target pigeon-mesh.service
 After=network-online.target pigeon-mesh.service
 ConditionFileNotEmpty=/encrypted/consul/consul.hcl
+StartLimitIntervalSec=60
+StartLimitBurst=5
 
 [Service]
 Type=notify
@@ -16,6 +18,15 @@ KillSignal=SIGTERM
 LimitNOFILE=65536
 CapabilityBoundingSet=CAP_NET_BIND_SERVICE
 AmbientCapabilities=CAP_NET_BIND_SERVICE
+SecureBits=keep-caps
+NoNewPrivileges=yes
+ProtectSystem=full
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+LimitCORE=0
 Restart=on-failure
 RestartSec=5
 

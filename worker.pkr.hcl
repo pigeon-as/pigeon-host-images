@@ -22,11 +22,18 @@ source "qemu" "worker" {
   format           = "qcow2"
   headless         = true
 
-  ssh_username = "root"
-  ssh_password = "packer"
-  ssh_timeout  = "10m"
+  accelerator = "kvm"
+  cpus        = 2
+  memory      = 2048
+  boot_wait   = "10s"
 
-  shutdown_command = "shutdown -P now"
+  ssh_username           = "root"
+  ssh_password           = "packer"
+  ssh_timeout            = "10m"
+  ssh_wait_timeout       = "1h"
+  ssh_handshake_attempts = 500
+
+  shutdown_command = "sudo -S shutdown -P now"
   output_directory = "build/worker"
   vm_name          = "worker.qcow2"
 
@@ -34,8 +41,7 @@ source "qemu" "worker" {
   cd_label = "cidata"
 
   qemuargs = [
-    ["-serial", "stdio"],
-    ["-m", "1024"],
+    ["-serial", "file:build/serial-worker.log"],
   ]
 }
 
@@ -45,6 +51,23 @@ build {
   provisioner "file" {
     source      = "templates/cmdline"
     destination = "/etc/kernel/cmdline"
+  }
+
+  provisioner "file" {
+    source      = "scripts/pigeon-verify-hook"
+    destination = "/etc/initramfs-tools/hooks/pigeon-verify"
+  }
+
+  provisioner "file" {
+    source      = "scripts/pigeon-verify"
+    destination = "/etc/initramfs-tools/scripts/local-bottom/pigeon-verify"
+  }
+
+  provisioner "shell" {
+    inline = [
+      "chmod 0755 /etc/initramfs-tools/hooks/pigeon-verify",
+      "chmod 0755 /etc/initramfs-tools/scripts/local-bottom/pigeon-verify",
+    ]
   }
 
   provisioner "shell" {

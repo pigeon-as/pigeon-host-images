@@ -8,6 +8,15 @@ ConditionPathExists=/encrypted/pigeon/enroll.json
 ExecStart=/opt/pigeon/bin/pigeon-template --config=/etc/pigeon/reconcile.tmpl.hcl
 Restart=on-failure
 RestartSec=5
+NoNewPrivileges=yes
+ProtectSystem=full
+ReadWritePaths=/etc/unbound/
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+LimitCORE=0
 
 [Install]
 WantedBy=multi-user.target
