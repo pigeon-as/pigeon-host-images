@@ -41,13 +41,20 @@ echo "UUID=${ESP_UUID} /boot/efi vfat umask=0077,noatime 0 2" > /mnt/etc/fstab
 umount /mnt
 cryptsetup close root
 
-# Enroll TPM2 PolicyAuthorize (if TPM + pubkey available)
-if [ -c /dev/tpmrm0 ] && [ -f /etc/pigeon/pcr-signing-pubkey.pem ]; then
-  echo -n "$LUKS_PASS" | systemd-cryptenroll \
-    --tpm2-device=auto \
-    --tpm2-public-key=/etc/pigeon/pcr-signing-pubkey.pem \
-    /dev/md1
+# Enroll TPM2 PolicyAuthorize — fail hard if prerequisites are missing
+# (without TPM enrollment, LUKS passphrase is discarded and the node is unbootable)
+if ! [ -c /dev/tpmrm0 ]; then
+  echo "FATAL: no TPM device (/dev/tpmrm0) — cannot enroll LUKS unlock" >&2
+  exit 1
 fi
+if ! [ -f /etc/pigeon/pcr-signing-pubkey.pem ]; then
+  echo "FATAL: no PCR signing pubkey (/etc/pigeon/pcr-signing-pubkey.pem) — cannot enroll LUKS unlock" >&2
+  exit 1
+fi
+echo -n "$LUKS_PASS" | systemd-cryptenroll \
+  --tpm2-device=auto \
+  --tpm2-public-key=/etc/pigeon/pcr-signing-pubkey.pem \
+  /dev/md1
 unset LUKS_PASS
 
 # Install systemd-boot to ESP (manual copy — bootctl needs efivarfs, unavailable in chroot)

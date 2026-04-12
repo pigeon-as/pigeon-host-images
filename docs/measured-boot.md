@@ -27,7 +27,7 @@ firmware → iPXE → UKI → dracut initrd
 
 ## How It Works
 
-1. **Build time** (`seal-rootfs.sh`): `mksquashfs /usr` → `veritysetup format` (hash-offset pattern) → `dracut` (systemd initrd) → `ukify build` (kernel + initrd + cmdline with `usrhash=<hash>`, PCR 11 signed)
+1. **Build time** (`scripts/build-uki.sh`): `mksquashfs /usr` → `veritysetup format` (hash-offset pattern) → `dracut` (systemd initrd) → `ukify build` (kernel + initrd + cmdline with `usrhash=<hash>`, PCR 11 signed)
 2. **Deploy time** (`make-image-bootable.sh`): LUKS format md1 → `systemd-cryptenroll --tpm2-public-key` (PolicyAuthorize) → populate root → install UKI to ESP
 3. **Boot**: systemd-stub extends PCR 11 → systemd-cryptsetup verifies `.pcrsig` signature → LUKS unseals → root mounts → veritysetup mounts /usr via dm-verity
 
