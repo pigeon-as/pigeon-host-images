@@ -22,7 +22,7 @@ firmware → iPXE → UKI → dracut initrd
 | Array | Content | Size | Purpose |
 |-------|---------|------|---------|
 | md0 | ESP (FAT32) | 1 GiB | UKI (pigeon.efi) |
-| md1 | LUKS2 root (ext4) | ~20 GiB | Writable /etc + /var + /opt + usr.img |
+| md1 | LUKS2 root (btrfs) | ~20 GiB | Writable /etc + /var + /opt + usr.img |
 | md2 | OVH staging | remainder | Dead after first boot |
 
 ## How It Works

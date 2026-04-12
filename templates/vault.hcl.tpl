@@ -14,7 +14,7 @@ listener "tcp" {
   tls_min_version = "tls12"
 }
 
-api_addr     = "https://{{ GetInterfaceIP \"wg0\" }}:8200"
+api_addr     = "https://vault.service.internal:8200"
 cluster_addr = "https://{{ GetInterfaceIP \"wg0\" }}:8201"
 
 storage "consul" {

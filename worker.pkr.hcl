@@ -49,7 +49,7 @@ source "qemu" "worker" {
   ssh_wait_timeout       = "1h"
   ssh_handshake_attempts = 500
 
-  shutdown_command = "sudo -S shutdown -P now"
+  shutdown_command = "shutdown -P now"
   output_directory = "build/worker"
   vm_name          = "worker.qcow2"
 

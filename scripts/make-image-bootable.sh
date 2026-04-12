@@ -1,5 +1,5 @@
 #!/bin/bash
-set -ex
+set -euo pipefail
 # OVH BYOLinux post-deploy hook — runs chrooted on staging (md2).
 # Formats LUKS root on md1, populates from staging, enrolls TPM2,
 # installs systemd-boot + versioned UKI with boot counting.
@@ -59,7 +59,11 @@ console-mode keep
 EOF
 
 # Copy versioned UKI with boot counting (3 tries before fallback)
-UKI=$(ls /boot/pigeon_*.efi 2>/dev/null | head -1)
+UKI=$(ls -v /boot/pigeon_*.efi 2>/dev/null | tail -1)
+if [ -z "${UKI}" ]; then
+  echo "FATAL: no UKI found in /boot/pigeon_*.efi" >&2
+  exit 1
+fi
 UKI_BASE=$(basename "${UKI}" .efi)
 cp "${UKI}" "/boot/efi/EFI/Linux/${UKI_BASE}+3.efi"
 
