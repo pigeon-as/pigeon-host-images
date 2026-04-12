@@ -2,9 +2,10 @@
 Description=pigeon-fence firewall manager
 After=network-online.target
 Wants=network-online.target
+ConditionPathExists=/var/lib/pigeon/enroll.json
 
 [Service]
-ExecStart=/opt/pigeon/bin/pigeon-fence --config=/etc/pigeon/fence.hcl --config=/encrypted/pigeon/fence.d
+ExecStart=/opt/pigeon/bin/pigeon-fence --config=/etc/pigeon/fence.hcl
 Restart=on-failure
 RestartSec=5
 
@@ -23,7 +24,7 @@ RestrictNamespaces=yes
 LockPersonality=yes
 MemoryDenyWriteExecute=yes
 ReadOnlyPaths=/etc/pigeon
-ReadWritePaths=/encrypted/pigeon
+ReadWritePaths=/run/pigeon-fence
 MemoryMax=128M
 LimitCORE=0
 

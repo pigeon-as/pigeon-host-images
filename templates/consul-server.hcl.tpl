@@ -43,9 +43,9 @@ acl {
 
 tls {
   defaults {
-    ca_file   = "/encrypted/tls/consul/ca.crt"
-    cert_file = "/encrypted/tls/consul/cert.pem"
-    key_file  = "/encrypted/tls/consul/key.pem"
+    ca_file   = "/etc/consul.d/certs/ca.crt"
+    cert_file = "/etc/consul.d/certs/cert.pem"
+    key_file  = "/etc/consul.d/certs/key.pem"
   }
   internal_rpc {
     verify_incoming        = true

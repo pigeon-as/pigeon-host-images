@@ -2,7 +2,7 @@
 Description=Watch for Nomad TLS certificate from Vault PKI
 
 [Path]
-PathExists=/encrypted/tls/nomad/cert.pem
+PathExists=/etc/nomad.d/certs/cert.pem
 Unit=nomad.service
 
 [Install]

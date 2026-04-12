@@ -12,6 +12,11 @@ variable "ubuntu_version" {
   default = "24.04"
 }
 
+variable "image_version" {
+  type    = string
+  default = "0.0.0"
+}
+
 source "qemu" "control-plane" {
   iso_url      = "https://cloud-images.ubuntu.com/releases/${var.ubuntu_version}/release/ubuntu-${var.ubuntu_version}-server-cloudimg-amd64.img"
   iso_checksum = "file:https://cloud-images.ubuntu.com/releases/${var.ubuntu_version}/release/SHA256SUMS"
@@ -53,23 +58,6 @@ build {
     destination = "/etc/kernel/cmdline"
   }
 
-  provisioner "file" {
-    source      = "scripts/pigeon-verify-hook"
-    destination = "/etc/initramfs-tools/hooks/pigeon-verify"
-  }
-
-  provisioner "file" {
-    source      = "scripts/pigeon-verify"
-    destination = "/etc/initramfs-tools/scripts/local-bottom/pigeon-verify"
-  }
-
-  provisioner "shell" {
-    inline = [
-      "chmod 0755 /etc/initramfs-tools/hooks/pigeon-verify",
-      "chmod 0755 /etc/initramfs-tools/scripts/local-bottom/pigeon-verify",
-    ]
-  }
-
   provisioner "shell" {
     script = "scripts/setup-kernel.sh"
   }
@@ -89,7 +77,6 @@ build {
       "scripts/setup-consul.sh",
       "scripts/setup-nomad.sh",
       "scripts/setup-unbound.sh",
-      "scripts/setup-unattended-upgrades.sh",
     ]
     environment_vars = [
       "PIGEON_MESH_VERSION=0.0.1-beta.1",
@@ -150,11 +137,6 @@ build {
   provisioner "file" {
     source      = "templates/mesh.json.tpl"
     destination = "/etc/pigeon/mesh.json.tpl"
-  }
-
-  provisioner "file" {
-    source      = "templates/fence-ovh.hcl.tpl"
-    destination = "/etc/pigeon/fence-ovh.hcl.tpl"
   }
 
   provisioner "file" {
@@ -278,13 +260,23 @@ build {
   }
 
   provisioner "file" {
-    source      = "scripts/configure-luks.sh"
-    destination = "/usr/local/bin/configure-luks.sh"
+    source      = "scripts/extract-ek-ca.sh"
+    destination = "/usr/local/bin/extract-ek-ca.sh"
+  }
+
+  # sysupdate.d configs go into /usr (sealed into immutable squashfs by seal-rootfs.sh)
+  provisioner "shell" {
+    inline = ["mkdir -p /usr/lib/sysupdate.d"]
   }
 
   provisioner "file" {
-    source      = "scripts/extract-ek-ca.sh"
-    destination = "/usr/local/bin/extract-ek-ca.sh"
+    source      = "templates/sysupdate-50-usr.transfer"
+    destination = "/usr/lib/sysupdate.d/50-usr.transfer"
+  }
+
+  provisioner "file" {
+    source      = "templates/sysupdate-70-uki.transfer"
+    destination = "/usr/lib/sysupdate.d/70-uki.transfer"
   }
 
   # Service state management — single source of truth.
@@ -293,7 +285,6 @@ build {
   provisioner "shell" {
     inline = [
       "systemctl enable nftables",
-      "systemctl enable unattended-upgrades",
       "systemctl enable pigeon-mesh",
       "systemctl enable pigeon-fence",
       "systemctl enable pigeon-enroll",
@@ -305,8 +296,33 @@ build {
       "systemctl enable consul",
       "systemctl enable nomad",
       "systemctl enable unbound",
+      "systemctl enable systemd-bless-boot",
       "systemctl disable systemd-resolved",
     ]
+  }
+
+  # seal-rootfs.sh creates the immutable /usr squashfs + dm-verity image
+  # and builds the UKI (kernel + dracut initrd + cmdline with verity root hash).
+  # Must run after all packages/binaries are installed (everything in /usr is sealed).
+  # PCR_SIGNING_KEY: set by CI to sign UKI for TPM2 PolicyAuthorize.
+  provisioner "shell" {
+    script = "scripts/seal-rootfs.sh"
+    environment_vars = [
+      "IMAGE_VERSION=${var.image_version}",
+    ]
+  }
+
+  # Download sysupdate artifacts for CI publishing to updates.pigeon.as
+  provisioner "file" {
+    source      = "/usr_${var.image_version}.img"
+    destination = "build/control-plane/pigeon_${var.image_version}.usr.img"
+    direction   = "download"
+  }
+
+  provisioner "file" {
+    source      = "/boot/pigeon_${var.image_version}.efi"
+    destination = "build/control-plane/pigeon_${var.image_version}.efi"
+    direction   = "download"
   }
 
   provisioner "shell" {

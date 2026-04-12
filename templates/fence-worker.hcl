@@ -24,6 +24,34 @@ rule "allow_icmpv6_inbound" {
   comment   = "ICMPv6"
 }
 
+rule "allow_wireguard_inbound" {
+  provider  = provider.nftables
+  direction = "inbound"
+  protocol  = "udp"
+  dst_port  = ["51820"]
+  action    = "accept"
+  comment   = "WireGuard tunnel (crypto-authenticated)"
+}
+
+rule "allow_memberlist_inbound" {
+  provider  = provider.nftables
+  direction = "inbound"
+  protocol  = "tcp"
+  dst_port  = ["7946"]
+  action    = "accept"
+  comment   = "Memberlist gossip (symmetric-encrypted)"
+}
+
+rule "allow_ssh_inbound" {
+  provider          = provider.nftables
+  direction         = "inbound"
+  protocol          = "tcp"
+  dst_port          = ["22"]
+  inbound_interface = "wg0"
+  action            = "accept"
+  comment           = "SSH via overlay only"
+}
+
 rule "allow_bgp_inbound" {
   provider  = provider.nftables
   direction = "inbound"

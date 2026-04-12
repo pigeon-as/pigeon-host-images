@@ -15,7 +15,7 @@ retry_join = ["servers.${file.enroll.vars.datacenter}.${file.enroll.vars.domain}
 
 auto_config {
   enabled          = true
-  intro_token_file = "/encrypted/consul/intro-token.jwt"
+  intro_token_file = "/etc/consul.d/intro-token.jwt"
 }
 
 encrypt = "${file.enroll.secrets.consul_encrypt}"
@@ -27,7 +27,7 @@ acl {
 
 tls {
   defaults {
-    ca_file = "/encrypted/tls/consul/ca.crt"
+    ca_file = "/etc/consul.d/certs/ca.crt"
   }
   internal_rpc {
     verify_incoming        = false

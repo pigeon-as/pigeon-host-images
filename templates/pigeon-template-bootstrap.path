@@ -2,7 +2,7 @@
 Description=Watch for pigeon enrollment secrets
 
 [Path]
-PathExists=/encrypted/pigeon/enroll.json
+PathExists=/var/lib/pigeon/enroll.json
 Unit=pigeon-template-bootstrap.service
 
 [Install]

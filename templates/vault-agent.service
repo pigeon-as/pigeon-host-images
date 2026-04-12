@@ -3,8 +3,8 @@ Description=Vault Agent (Nomad TLS cert renewal from Vault PKI)
 Wants=network-online.target
 After=network-online.target pigeon-mesh.service consul.service
 Requires=pigeon-mesh.service consul.service
-ConditionPathExists=/encrypted/tls/auth/cert.pem
-ConditionPathExists=/encrypted/tls/auth/key.pem
+ConditionPathExists=/etc/pigeon/certs/auth/cert.pem
+ConditionPathExists=/etc/pigeon/certs/auth/key.pem
 
 [Service]
 ExecStart=/usr/bin/vault agent -config=/etc/pigeon/vault-agent.hcl
@@ -14,6 +14,7 @@ LimitNOFILE=65536
 LimitCORE=0
 NoNewPrivileges=yes
 ProtectSystem=full
+ReadWritePaths=/etc/nomad.d/certs/
 ProtectHome=yes
 PrivateTmp=yes
 PrivateDevices=yes

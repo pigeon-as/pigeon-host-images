@@ -3,7 +3,7 @@ Description=Vault
 Documentation=https://developer.hashicorp.com/vault
 Wants=network-online.target pigeon-mesh.service
 After=network-online.target pigeon-mesh.service
-ConditionFileNotEmpty=/encrypted/vault/vault.hcl
+ConditionFileNotEmpty=/etc/vault.d/vault.hcl
 StartLimitIntervalSec=60
 StartLimitBurst=5
 
@@ -21,7 +21,7 @@ CapabilityBoundingSet=CAP_SYSLOG CAP_IPC_LOCK
 NoNewPrivileges=yes
 ProtectKernelTunables=yes
 ProtectKernelModules=yes
-ExecStart=/usr/bin/vault server -config=/encrypted/vault
+ExecStart=/usr/bin/vault server -config=/etc/vault.d
 ExecReload=/bin/kill -HUP $MAINPID
 KillMode=process
 KillSignal=SIGINT

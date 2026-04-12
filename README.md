@@ -6,7 +6,7 @@ Two images: **[control-plane.qcow2](control-plane.pkr.hcl)** and **[worker.qcow2
 
 ## Measured Boot
 
-UKI + LUKS sealed to TPM2 PCR 7+11+14. PCR 14 = initramfs hashes critical binaries before LUKS unseals. Tampered binary → wrong hash → brick.
+UKI + LUKS sealed to TPM2 PolicyAuthorize (PCR 11). Immutable /usr via dm-verity on squashfs. Tampered /usr → kernel panic. Unsigned UKI → LUKS stays sealed → brick. See [docs/measured-boot.md](docs/measured-boot.md).
 
 ## TPM Attestation
 

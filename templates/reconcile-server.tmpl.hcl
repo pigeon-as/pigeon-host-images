@@ -1,5 +1,5 @@
 source "file" "enroll" {
-  path = "/encrypted/pigeon/enroll.json"
+  path = "/var/lib/pigeon/enroll.json"
 }
 
 source "exec" "peers" {
@@ -8,12 +8,12 @@ source "exec" "peers" {
 }
 
 source "exec" "enroll_token" {
-  command  = "pigeon-enroll generate-token -config=/encrypted/pigeon/enroll-server.hcl"
+  command  = "pigeon-enroll generate-token -config=/etc/pigeon/enroll-server.hcl"
   interval = "10m"
 }
 
 source "exec" "enroll_cert" {
-  command  = "pigeon-enroll generate-cert -base64 -bundle - -config=/encrypted/pigeon/enroll-server.hcl -ttl 1h"
+  command  = "pigeon-enroll generate-cert -base64 -bundle - -config=/etc/pigeon/enroll-server.hcl -ttl 1h"
   interval = "30m"
 }
 
@@ -30,7 +30,7 @@ template {
 
 template {
   source      = "/etc/pigeon/setup-worker.sh.tpl"
-  destination = "/encrypted/pigeon/setup-worker.sh"
+  destination = "/var/lib/pigeon/setup-worker.sh"
   perms       = "0600"
 }
 

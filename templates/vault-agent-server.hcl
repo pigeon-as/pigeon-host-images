@@ -1,14 +1,14 @@
 vault {
   address = "https://127.0.0.1:8200"
-  ca_cert = "/encrypted/tls/vault/ca.crt"
+  ca_cert = "/etc/vault.d/certs/ca.crt"
 }
 
 auto_auth {
   method "cert" {
     config = {
       name        = "server"
-      client_cert = "/encrypted/tls/auth/cert.pem"
-      client_key  = "/encrypted/tls/auth/key.pem"
+      client_cert = "/etc/pigeon/certs/auth/cert.pem"
+      client_key  = "/etc/pigeon/certs/auth/key.pem"
     }
   }
 }
@@ -20,27 +20,27 @@ template_config {
 # Consul server cert
 template {
   source      = "/etc/pigeon/consul-server-key.ctmpl"
-  destination = "/encrypted/tls/consul/key.pem"
+  destination = "/etc/consul.d/certs/key.pem"
   perms       = 0600
 }
 
 template {
   source      = "/etc/pigeon/consul-server-cert.ctmpl"
-  destination = "/encrypted/tls/consul/cert.pem"
+  destination = "/etc/consul.d/certs/cert.pem"
   perms       = 0640
-  command     = "chown consul:consul /encrypted/tls/consul/cert.pem /encrypted/tls/consul/key.pem && systemctl reload consul 2>/dev/null || true"
+  command     = "chown consul:consul /etc/consul.d/certs/cert.pem /etc/consul.d/certs/key.pem && systemctl reload consul 2>/dev/null || true"
 }
 
 # Nomad server cert
 template {
   source      = "/etc/pigeon/nomad-server-key.ctmpl"
-  destination = "/encrypted/tls/nomad/key.pem"
+  destination = "/etc/nomad.d/certs/key.pem"
   perms       = 0600
 }
 
 template {
   source      = "/etc/pigeon/nomad-server-cert.ctmpl"
-  destination = "/encrypted/tls/nomad/cert.pem"
+  destination = "/etc/nomad.d/certs/cert.pem"
   perms       = 0640
   command     = "systemctl reload nomad 2>/dev/null || true"
 }
@@ -48,13 +48,13 @@ template {
 # Vault server cert
 template {
   source      = "/etc/pigeon/vault-server-key.ctmpl"
-  destination = "/encrypted/tls/vault/key.pem"
+  destination = "/etc/vault.d/certs/key.pem"
   perms       = 0600
 }
 
 template {
   source      = "/etc/pigeon/vault-server-cert.ctmpl"
-  destination = "/encrypted/tls/vault/cert.pem"
+  destination = "/etc/vault.d/certs/cert.pem"
   perms       = 0640
-  command     = "chown vault:vault /encrypted/tls/vault/cert.pem /encrypted/tls/vault/key.pem && systemctl reload vault 2>/dev/null || true"
+  command     = "chown vault:vault /etc/vault.d/certs/cert.pem /etc/vault.d/certs/key.pem && systemctl reload vault 2>/dev/null || true"
 }

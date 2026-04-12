@@ -1,0 +1,17 @@
+# Download versioned usr.img (squashfs + dm-verity) to LUKS root.
+# ProtectVersion=%A prevents deletion of the currently running version.
+
+[Transfer]
+ProtectVersion=%A
+
+[Source]
+Type=url-file
+Path=https://updates.pigeon.as/
+MatchPattern=pigeon_@v.usr.img
+
+[Target]
+Type=regular-file
+Path=/
+MatchPattern=usr_@v.img
+InstancesMax=2
+ReadOnly=1

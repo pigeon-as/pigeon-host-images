@@ -2,10 +2,10 @@
 Description=pigeon-mesh WireGuard overlay
 After=network-online.target
 Wants=network-online.target
-ConditionPathExists=/encrypted/pigeon/mesh.json
+ConditionPathExists=/etc/pigeon/mesh.json
 
 [Service]
-ExecStart=/opt/pigeon/bin/pigeon-mesh --config=/encrypted/pigeon/mesh.json
+ExecStart=/opt/pigeon/bin/pigeon-mesh --config=/etc/pigeon/mesh.json
 Restart=on-failure
 RestartSec=5
 
@@ -14,7 +14,7 @@ ProtectSystem=strict
 ProtectHome=yes
 PrivateTmp=yes
 ReadWritePaths=/var/lib/pigeon-mesh /run/pigeon-mesh
-ReadOnlyPaths=/encrypted
+ReadOnlyPaths=/etc/pigeon
 CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_RAW
 AmbientCapabilities=CAP_NET_ADMIN CAP_NET_RAW
 LimitCORE=0

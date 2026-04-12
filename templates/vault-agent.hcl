@@ -1,14 +1,14 @@
 vault {
   address = "https://active.vault.service.internal:8200"
-  ca_cert = "/encrypted/tls/vault/ca.crt"
+  ca_cert = "/etc/vault.d/certs/ca.crt"
 }
 
 auto_auth {
   method "cert" {
     config = {
       name        = "worker"
-      client_cert = "/encrypted/tls/auth/cert.pem"
-      client_key  = "/encrypted/tls/auth/key.pem"
+      client_cert = "/etc/pigeon/certs/auth/cert.pem"
+      client_key  = "/etc/pigeon/certs/auth/key.pem"
     }
   }
 }
@@ -19,13 +19,13 @@ template_config {
 
 template {
   source      = "/etc/pigeon/nomad-key.ctmpl"
-  destination = "/encrypted/tls/nomad/key.pem"
+  destination = "/etc/nomad.d/certs/key.pem"
   perms       = 0600
 }
 
 template {
   source      = "/etc/pigeon/nomad-cert.ctmpl"
-  destination = "/encrypted/tls/nomad/cert.pem"
+  destination = "/etc/nomad.d/certs/cert.pem"
   perms       = 0640
   command     = "systemctl reload nomad 2>/dev/null || true"
 }
