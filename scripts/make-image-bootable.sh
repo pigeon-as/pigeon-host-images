@@ -55,6 +55,9 @@ echo -n "$LUKS_PASS" | systemd-cryptenroll \
   --tpm2-device=auto \
   --tpm2-public-key=/etc/pigeon/pcr-signing-pubkey.pem \
   /dev/md1
+
+# Remove throwaway passphrase keyslot
+echo -n "$LUKS_PASS" | cryptsetup luksRemoveKey --batch-mode --key-file=- /dev/md1
 unset LUKS_PASS
 
 # Install systemd-boot to ESP (manual copy — bootctl needs efivarfs, unavailable in chroot)
