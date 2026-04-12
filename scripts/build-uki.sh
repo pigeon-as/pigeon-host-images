@@ -10,6 +10,8 @@ set -euo pipefail
 #                          Required for production. Set SKIP_SIGNING=true for dev builds.
 
 IMAGE_VERSION="${IMAGE_VERSION:-0.0.0}"
+PCR_SIGNING_KEY="${PCR_SIGNING_KEY:-}"
+SKIP_SIGNING="${SKIP_SIGNING:-}"
 KVER=$(ls /lib/modules/ | sort -V | tail -1)
 VMLINUZ="/boot/vmlinuz-${KVER}"
 SIGNING_DIR=$(mktemp -d)

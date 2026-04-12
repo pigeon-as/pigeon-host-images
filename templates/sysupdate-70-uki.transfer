@@ -15,7 +15,9 @@ MatchPattern=pigeon_@v.efi
 Type=regular-file
 Path=/EFI/Linux
 PathRelativeTo=boot
-MatchPattern=pigeon_@v+@l-@d.efi|pigeon_@v+@l.efi|pigeon_@v.efi
+MatchPattern=pigeon_@v+@l-@d.efi \
+             pigeon_@v+@l.efi \
+             pigeon_@v.efi
 TriesLeft=3
 TriesDone=0
 InstancesMax=2
