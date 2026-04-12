@@ -10,7 +10,7 @@ ConditionPathExists=/etc/pigeon/enroll-server.hcl
 ExecStart=/opt/pigeon/bin/pigeon-enroll server -config=/etc/pigeon/enroll-server.hcl
 # Disable SSH after enrollment server starts — enrollment key has been delivered,
 # SSH is no longer needed. Survives reboot (disabled, not just stopped).
-ExecStartPost=/usr/bin/systemctl disable --now ssh.service
+ExecStartPost=+/usr/bin/systemctl disable --now ssh.service
 Restart=on-failure
 RestartSec=5
 NoNewPrivileges=yes
