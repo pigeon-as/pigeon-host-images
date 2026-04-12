@@ -1,5 +1,5 @@
 #!/bin/bash
-set -ex
+set -euo pipefail
 # Build-time: seal /usr as immutable squashfs + dm-verity, build versioned UKI.
 #
 # Required:
@@ -56,8 +56,9 @@ HASH_OFFSET=$(( (SQUASH_SIZE + 4095) / 4096 * 4096 ))
 truncate -s "${HASH_OFFSET}" /usr_${IMAGE_VERSION}.img
 
 # dm-verity hash tree appended at HASH_OFFSET (ChromeOS single-file pattern)
-VERITY_OUT=$(veritysetup format /usr_${IMAGE_VERSION}.img /usr_${IMAGE_VERSION}.img --hash-offset="${HASH_OFFSET}" 2>&1)
-ROOT_HASH=$(echo "$VERITY_OUT" | grep "Root hash:" | awk '{print $NF}')
+veritysetup format /usr_${IMAGE_VERSION}.img /usr_${IMAGE_VERSION}.img \
+  --hash-offset="${HASH_OFFSET}" --root-hash-file=/tmp/root-hash
+ROOT_HASH=$(< /tmp/root-hash)
 
 # dracut initrd with systemd generators
 dracut --force --kver "${KVER}" /tmp/initrd.img \

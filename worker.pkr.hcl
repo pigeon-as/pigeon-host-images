@@ -221,14 +221,6 @@ build {
     destination = "/etc/security/limits.d/99-pigeon.conf"
   }
 
-  # Workers have no SSH daemon — remove openssh-server from Ubuntu cloud image
-  provisioner "shell" {
-    inline = [
-      "DEBIAN_FRONTEND=noninteractive apt-get remove --purge -y openssh-server openssh-sftp-server",
-      "rm -rf /etc/ssh",
-    ]
-  }
-
   provisioner "file" {
     source      = "templates/blacklist.conf"
     destination = "/etc/modprobe.d/99-pigeon-blacklist.conf"
@@ -239,9 +231,8 @@ build {
     destination = "/etc/modprobe.d/99-pigeon-kvm.conf"
   }
 
-  # sysupdate.d configs go into /usr (sealed into immutable squashfs by seal-rootfs.sh)
   provisioner "shell" {
-    inline = ["mkdir -p /usr/lib/sysupdate.d"]
+    script = "scripts/setup-sysupdate.sh"
   }
 
   provisioner "file" {
@@ -254,22 +245,25 @@ build {
     destination = "/usr/lib/sysupdate.d/70-uki.transfer"
   }
 
-  # Service state management — single source of truth.
-  # apt packages auto-enable during install; disable what we don't want,
-  # then enable exactly what this image needs.
+  # Mask SSH — workers have no SSH daemon
   provisioner "shell" {
     inline = [
-      # Disable apt-installed defaults not needed on workers
-      "systemctl disable vault",
+      "systemctl mask ssh.service ssh.socket",
+      "rm -rf /etc/ssh",
+    ]
+  }
 
-      # Enable services for this image
+  provisioner "shell" {
+    inline = [
+      "systemctl disable vault",
+      "systemctl disable systemd-resolved",
+
       "systemctl enable nftables",
       "systemctl enable pigeon-mesh",
       "systemctl enable pigeon-fence",
       "systemctl enable pigeon-template-reconcile",
       "systemctl enable unbound",
       "systemctl enable systemd-bless-boot",
-      "systemctl disable systemd-resolved",
       "systemctl enable consul",
       "systemctl enable vault-agent",
       "systemctl enable nomad-cert.path",
@@ -282,12 +276,9 @@ build {
     script = "scripts/setup-hugepages.sh"
   }
 
-  # seal-rootfs.sh creates the immutable /usr squashfs + dm-verity image
-  # and builds the UKI (kernel + dracut initrd + cmdline with verity root hash).
-  # Must run after all packages/binaries are installed (everything in /usr is sealed).
-  # Signing keys are base64-encoded PEM (standard CI secret pattern).
+  # Must run after all packages/binaries are installed.
   provisioner "shell" {
-    script = "scripts/seal-rootfs.sh"
+    script = "scripts/build-uki.sh"
     environment_vars = [
       "IMAGE_VERSION=${var.image_version}",
       "SKIP_SIGNING=${var.skip_signing}",
@@ -295,7 +286,7 @@ build {
     ]
   }
 
-  # Download sysupdate artifacts for CI publishing to updates.pigeon.as
+  # Sysupdate artifacts for CI publishing
   provisioner "file" {
     source      = "/usr_${var.image_version}.img"
     destination = "build/worker/pigeon_${var.image_version}.usr.img"

@@ -30,10 +30,13 @@ rsync -aAX \
   --exclude='/proc' --exclude='/sys' --exclude='/dev' --exclude='/run' --exclude='/tmp' \
   --exclude='/mnt' --exclude='/root/.ovh' \
   / /mnt/
-mkdir -p /mnt/usr /mnt/boot /mnt/proc /mnt/sys /mnt/dev /mnt/run /mnt/tmp /mnt/mnt
+mkdir -p /mnt/usr /mnt/boot/efi /mnt/proc /mnt/sys /mnt/dev /mnt/run /mnt/tmp /mnt/mnt
 
-# Empty fstab — systemd generators mount root and /usr from UKI cmdline
-: > /mnt/etc/fstab
+# Minimal fstab — root and /usr come from UKI cmdline, but ESP must be
+# mounted persistently for sysupdate and boot counting/blessing.
+ESP_DEV=$(findmnt -no SOURCE /boot/efi)
+ESP_UUID=$(blkid -s UUID -o value "$ESP_DEV")
+echo "UUID=${ESP_UUID} /boot/efi vfat umask=0077,noatime 0 2" > /mnt/etc/fstab
 
 umount /mnt
 cryptsetup close root
