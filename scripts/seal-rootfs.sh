@@ -1,13 +1,45 @@
 #!/bin/bash
 set -ex
 # Build-time: seal /usr as immutable squashfs + dm-verity, build versioned UKI.
-# IMAGE_VERSION: image version for A/B updates (default: 0.0.0).
-# PCR_SIGNING_KEY: path to RSA-2048 private key for PCR 11 signing (CI secret).
+#
+# Required:
+#   IMAGE_VERSION        — image version for A/B updates (default: 0.0.0)
+#
+# Signing (base64-encoded PEM, standard CI secret pattern):
+#   PCR_SIGNING_KEY      — RSA-2048 private key for PCR 11 PolicyAuthorize.
+#                          Required for production. Set SKIP_SIGNING=true for dev builds.
 
 IMAGE_VERSION="${IMAGE_VERSION:-0.0.0}"
 KVER=$(ls /lib/modules/ | sort -V | tail -1)
 VMLINUZ="/boot/vmlinuz-${KVER}"
+SIGNING_DIR=$(mktemp -d)
+trap 'rm -rf "${SIGNING_DIR}"' EXIT
+
+# Decode base64 signing keys to temp files (CI secrets → file)
+decode_key() {
+  local var_name="$1" out_path="$2"
+  local val="${!var_name}"
+  if [ -n "${val}" ]; then
+    echo "${val}" | base64 -d > "${out_path}"
+    echo "  ${var_name}: decoded"
+    return 0
+  fi
+  return 1
+}
+
+# PCR signing key — required unless explicitly skipped
+PCR_KEY="${SIGNING_DIR}/pcr-key.pem"
 PCR_PUBKEY="/etc/pigeon/pcr-signing-pubkey.pem"
+if decode_key PCR_SIGNING_KEY "${PCR_KEY}"; then
+  # Derive public key and persist in image (needed by systemd-cryptenroll PolicyAuthorize)
+  openssl rsa -in "${PCR_KEY}" -pubout -out "${PCR_PUBKEY}" 2>/dev/null
+elif [ "${SKIP_SIGNING}" = "true" ]; then
+  echo "WARNING: PCR signing disabled — evil maid protection inactive. Dev builds only."
+  PCR_KEY=""
+else
+  echo "ERROR: PCR_SIGNING_KEY required. Set SKIP_SIGNING=true for dev builds."
+  exit 1
+fi
 
 # crypttab — dracut bakes this into the initrd for systemd-cryptsetup
 cat > /etc/crypttab <<'EOF'
@@ -41,8 +73,8 @@ printf '%s' "${CMDLINE}" > /tmp/cmdline.txt
 
 # Build UKI — sign for PCR 11 at enter-initrd phase only (LUKS unseals in initrd)
 UKIFY_ARGS=(build --linux="${VMLINUZ}" --initrd=/tmp/initrd.img --cmdline=@/tmp/cmdline.txt --output=/boot/pigeon_${IMAGE_VERSION}.efi)
-if [ -n "${PCR_SIGNING_KEY}" ] && [ -f "${PCR_SIGNING_KEY}" ]; then
-  UKIFY_ARGS+=(--pcr-private-key="${PCR_SIGNING_KEY}" --pcr-public-key="${PCR_PUBKEY}" --phases='enter-initrd' --pcr-banks=sha256 --pcrpkey="${PCR_PUBKEY}")
+if [ -n "${PCR_KEY}" ]; then
+  UKIFY_ARGS+=(--pcr-private-key="${PCR_KEY}" --pcr-public-key="${PCR_PUBKEY}" --phases='enter-initrd' --pcr-banks=sha256 --pcrpkey="${PCR_PUBKEY}")
 fi
 ukify "${UKIFY_ARGS[@]}"
 

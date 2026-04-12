@@ -17,6 +17,17 @@ variable "image_version" {
   default = "0.0.0"
 }
 
+variable "skip_signing" {
+  type    = string
+  default = "true"
+}
+
+variable "pcr_signing_key" {
+  type      = string
+  default   = ""
+  sensitive = true
+}
+
 source "qemu" "control-plane" {
   iso_url      = "https://cloud-images.ubuntu.com/releases/${var.ubuntu_version}/release/ubuntu-${var.ubuntu_version}-server-cloudimg-amd64.img"
   iso_checksum = "file:https://cloud-images.ubuntu.com/releases/${var.ubuntu_version}/release/SHA256SUMS"
@@ -235,7 +246,7 @@ build {
   }
 
   provisioner "file" {
-    source      = "templates/nftables.conf"
+    source      = "templates/nftables-server.conf"
     destination = "/etc/nftables.conf"
   }
 
@@ -304,11 +315,13 @@ build {
   # seal-rootfs.sh creates the immutable /usr squashfs + dm-verity image
   # and builds the UKI (kernel + dracut initrd + cmdline with verity root hash).
   # Must run after all packages/binaries are installed (everything in /usr is sealed).
-  # PCR_SIGNING_KEY: set by CI to sign UKI for TPM2 PolicyAuthorize.
+  # Signing keys are base64-encoded PEM (standard CI secret pattern).
   provisioner "shell" {
     script = "scripts/seal-rootfs.sh"
     environment_vars = [
       "IMAGE_VERSION=${var.image_version}",
+      "SKIP_SIGNING=${var.skip_signing}",
+      "PCR_SIGNING_KEY=${var.pcr_signing_key}",
     ]
   }
 

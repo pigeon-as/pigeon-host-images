@@ -42,16 +42,6 @@ rule "allow_memberlist_inbound" {
   comment   = "Memberlist gossip (symmetric-encrypted)"
 }
 
-rule "allow_ssh_inbound" {
-  provider          = provider.nftables
-  direction         = "inbound"
-  protocol          = "tcp"
-  dst_port          = ["22"]
-  inbound_interface = "wg0"
-  action            = "accept"
-  comment           = "SSH via overlay only"
-}
-
 rule "allow_bgp_inbound" {
   provider  = provider.nftables
   direction = "inbound"

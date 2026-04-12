@@ -31,10 +31,18 @@ jobs:
         run: echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
 
       - name: Build control-plane image
-        run: make build-control-plane IMAGE_VERSION=${{ steps.version.outputs.VERSION }}
+        run: >
+          make build-control-plane
+          IMAGE_VERSION=${{ steps.version.outputs.VERSION }}
+          SKIP_SIGNING=false
+          PCR_SIGNING_KEY=${{ secrets.PCR_SIGNING_KEY }}
 
       - name: Build worker image
-        run: make build-worker IMAGE_VERSION=${{ steps.version.outputs.VERSION }}
+        run: >
+          make build-worker
+          IMAGE_VERSION=${{ steps.version.outputs.VERSION }}
+          SKIP_SIGNING=false
+          PCR_SIGNING_KEY=${{ secrets.PCR_SIGNING_KEY }}
 
       - name: Generate checksums
         run: |
