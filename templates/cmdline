@@ -1,1 +1,1 @@
-nomodeset iommu=pt nosmt=force init_on_alloc=1 slab_nomerge vsyscall=none lockdown=confidentiality debugfs=off net.ifnames=0 biosdevname=0 console=ttyS0,115200n8
+nomodeset iommu=pt nosmt=force init_on_alloc=1 slab_nomerge vsyscall=none lockdown=confidentiality debugfs=off net.ifnames=0 biosdevname=0 rd.shell=0 rd.emergency=reboot console=ttyS0,115200n8

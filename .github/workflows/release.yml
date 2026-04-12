@@ -26,16 +26,37 @@ jobs:
       - name: Install Packer
         uses: hashicorp/setup-packer@v3
 
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
       - name: Build control-plane image
-        run: make build-control-plane
+        env:
+          PCR_SIGNING_KEY: ${{ secrets.PCR_SIGNING_KEY }}
+        run: >
+          make build-control-plane
+          IMAGE_VERSION=${{ steps.version.outputs.VERSION }}
+          SKIP_SIGNING=false
 
       - name: Build worker image
-        run: make build-worker
+        env:
+          PCR_SIGNING_KEY: ${{ secrets.PCR_SIGNING_KEY }}
+        run: >
+          make build-worker
+          IMAGE_VERSION=${{ steps.version.outputs.VERSION }}
+          SKIP_SIGNING=false
 
       - name: Generate checksums
         run: |
           cd build
-          sha256sum control-plane/control-plane.qcow2 worker/worker.qcow2 > SHA256SUMS
+          sha256sum \
+            control-plane/control-plane.qcow2 \
+            worker/worker.qcow2 \
+            control-plane/pigeon_${{ steps.version.outputs.VERSION }}.usr.img \
+            control-plane/pigeon_${{ steps.version.outputs.VERSION }}.efi \
+            worker/pigeon_${{ steps.version.outputs.VERSION }}.usr.img \
+            worker/pigeon_${{ steps.version.outputs.VERSION }}.efi \
+            > SHA256SUMS
 
       - name: Create release
         uses: softprops/action-gh-release@v2
@@ -43,4 +64,8 @@ jobs:
           files: |
             build/control-plane/control-plane.qcow2
             build/worker/worker.qcow2
+            build/control-plane/pigeon_${{ steps.version.outputs.VERSION }}.usr.img
+            build/control-plane/pigeon_${{ steps.version.outputs.VERSION }}.efi
+            build/worker/pigeon_${{ steps.version.outputs.VERSION }}.usr.img
+            build/worker/pigeon_${{ steps.version.outputs.VERSION }}.efi
             build/SHA256SUMS

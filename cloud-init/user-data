@@ -1,9 +1,12 @@
 #cloud-config
+# Root password "packer" (hashed)
+users:
+  - name: root
+    lock_passwd: false
+    hashed_passwd: "$6$z84gyiHaKFCjApcq$9B4lH1tgRp.iD6JKwu.JiOQXXpQUDfMs2JOD5a06S1jAnr.JXOCH/L7uVcSRXwtMcqoHCzPTO8VLuU4A96cs91"
+    ssh_redirect_user: false
 ssh_pwauth: true
 disable_root: false
-chpasswd:
-  expire: false
-  users:
-    - name: root
-      password: packer
-      type: text
+runcmd:
+  - sed -i -e '/^[#]*PermitRootLogin/s/^.*$/PermitRootLogin yes/' /etc/ssh/sshd_config
+  - systemctl restart ssh

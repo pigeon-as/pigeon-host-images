@@ -3,12 +3,14 @@ Description=Nomad
 Documentation=https://developer.hashicorp.com/nomad
 Wants=network-online.target pigeon-mesh.service
 After=network-online.target pigeon-mesh.service consul.service vault-agent.service
-ConditionFileNotEmpty=/encrypted/nomad/nomad.hcl
-ConditionPathExists=/encrypted/tls/nomad/cert.pem
+ConditionFileNotEmpty=/etc/nomad.d/nomad.hcl
+ConditionPathExists=/etc/nomad.d/certs/cert.pem
+StartLimitIntervalSec=60
+StartLimitBurst=3
 
 [Service]
 Type=notify
-ExecStart=/usr/bin/nomad agent -config /encrypted/nomad
+ExecStart=/usr/bin/nomad agent -config /etc/nomad.d
 ExecReload=/bin/kill -HUP $MAINPID
 KillMode=process
 KillSignal=SIGINT
@@ -18,6 +20,11 @@ Restart=on-failure
 RestartSec=5
 TasksMax=infinity
 OOMScoreAdjust=-1000
+LimitCORE=0
+ProtectSystem=full
+ProtectHome=yes
+PrivateTmp=yes
+TimeoutStopSec=30
 
 [Install]
 WantedBy=multi-user.target

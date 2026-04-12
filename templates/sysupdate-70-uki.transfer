@@ -1,0 +1,23 @@
+# Download versioned UKI to ESP with boot counting.
+# Written AFTER usr.img (higher prefix number) for safety.
+# ProtectVersion=%A prevents deletion of the currently running version.
+# TriesLeft=3: systemd-boot will try 3 times before marking as bad and falling back.
+
+[Transfer]
+ProtectVersion=%A
+
+[Source]
+Type=url-file
+Path=https://updates.pigeon.as/
+MatchPattern=pigeon_@v.efi
+
+[Target]
+Type=regular-file
+Path=/EFI/Linux
+PathRelativeTo=boot
+MatchPattern=pigeon_@v+@l-@d.efi \
+             pigeon_@v+@l.efi \
+             pigeon_@v.efi
+TriesLeft=3
+TriesDone=0
+InstancesMax=2

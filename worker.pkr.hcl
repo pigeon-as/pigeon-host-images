@@ -12,6 +12,22 @@ variable "ubuntu_version" {
   default = "24.04"
 }
 
+variable "image_version" {
+  type    = string
+  default = "0.0.0"
+}
+
+variable "skip_signing" {
+  type    = string
+  default = "true"
+}
+
+variable "pcr_signing_key" {
+  type      = string
+  default   = ""
+  sensitive = true
+}
+
 source "qemu" "worker" {
   iso_url      = "https://cloud-images.ubuntu.com/releases/${var.ubuntu_version}/release/ubuntu-${var.ubuntu_version}-server-cloudimg-amd64.img"
   iso_checksum = "file:https://cloud-images.ubuntu.com/releases/${var.ubuntu_version}/release/SHA256SUMS"
@@ -22,9 +38,16 @@ source "qemu" "worker" {
   format           = "qcow2"
   headless         = true
 
-  ssh_username = "root"
-  ssh_password = "packer"
-  ssh_timeout  = "10m"
+  accelerator = "kvm"
+  cpus        = 2
+  memory      = 2048
+  boot_wait   = "10s"
+
+  ssh_username           = "root"
+  ssh_password           = "packer"
+  ssh_timeout            = "10m"
+  ssh_wait_timeout       = "1h"
+  ssh_handshake_attempts = 500
 
   shutdown_command = "shutdown -P now"
   output_directory = "build/worker"
@@ -34,8 +57,7 @@ source "qemu" "worker" {
   cd_label = "cidata"
 
   qemuargs = [
-    ["-serial", "stdio"],
-    ["-m", "1024"],
+    ["-serial", "file:build/serial-worker.log"],
   ]
 }
 
@@ -72,7 +94,6 @@ build {
       "scripts/setup-lvm-plugin.sh",
       "scripts/setup-bird.sh",
       "scripts/setup-haproxy.sh",
-      "scripts/setup-unattended-upgrades.sh",
     ]
     environment_vars = [
       "PIGEON_MESH_VERSION=0.0.1-beta.1",
@@ -103,11 +124,6 @@ build {
   provisioner "file" {
     source      = "templates/mesh.json.tpl"
     destination = "/etc/pigeon/mesh.json.tpl"
-  }
-
-  provisioner "file" {
-    source      = "templates/fence-ovh.hcl.tpl"
-    destination = "/etc/pigeon/fence-ovh.hcl.tpl"
   }
 
   provisioner "file" {
@@ -191,7 +207,7 @@ build {
   }
 
   provisioner "file" {
-    source      = "templates/nftables.conf"
+    source      = "templates/nftables-worker.conf"
     destination = "/etc/nftables.conf"
   }
 
@@ -206,11 +222,6 @@ build {
   }
 
   provisioner "file" {
-    source      = "templates/sshd.conf"
-    destination = "/etc/ssh/sshd_config.d/99-pigeon.conf"
-  }
-
-  provisioner "file" {
     source      = "templates/blacklist.conf"
     destination = "/etc/modprobe.d/99-pigeon-blacklist.conf"
   }
@@ -221,26 +232,53 @@ build {
   }
 
   provisioner "file" {
-    source      = "scripts/configure-luks.sh"
-    destination = "/usr/local/bin/configure-luks.sh"
+    source      = "scripts/setup-lvm-pool.sh"
+    destination = "/usr/local/bin/setup-lvm-pool.sh"
   }
 
-  # Service state management — single source of truth.
-  # apt packages auto-enable during install; disable what we don't want,
-  # then enable exactly what this image needs.
+  provisioner "shell" {
+    inline = ["chmod 0755 /usr/local/bin/setup-lvm-pool.sh"]
+  }
+
+  provisioner "file" {
+    source      = "templates/setup-lvm-pool.service"
+    destination = "/etc/systemd/system/setup-lvm-pool.service"
+  }
+
+  provisioner "shell" {
+    script = "scripts/setup-sysupdate.sh"
+  }
+
+  provisioner "file" {
+    source      = "templates/sysupdate-50-usr.transfer"
+    destination = "/usr/lib/sysupdate.d/50-usr.transfer"
+  }
+
+  provisioner "file" {
+    source      = "templates/sysupdate-70-uki.transfer"
+    destination = "/usr/lib/sysupdate.d/70-uki.transfer"
+  }
+
+  # Mask SSH — workers have no SSH daemon
   provisioner "shell" {
     inline = [
-      # Disable apt-installed defaults not needed on workers
-      "systemctl disable vault",
+      "systemctl mask ssh.service ssh.socket",
+      "rm -rf /etc/ssh",
+    ]
+  }
 
-      # Enable services for this image
+  provisioner "shell" {
+    inline = [
+      "systemctl disable vault",
+      "systemctl disable systemd-resolved",
+
       "systemctl enable nftables",
-      "systemctl enable unattended-upgrades",
+      "systemctl enable setup-lvm-pool",
       "systemctl enable pigeon-mesh",
       "systemctl enable pigeon-fence",
       "systemctl enable pigeon-template-reconcile",
       "systemctl enable unbound",
-      "systemctl disable systemd-resolved",
+      "systemctl enable systemd-bless-boot",
       "systemctl enable consul",
       "systemctl enable vault-agent",
       "systemctl enable nomad-cert.path",
@@ -251,6 +289,29 @@ build {
 
   provisioner "shell" {
     script = "scripts/setup-hugepages.sh"
+  }
+
+  # Must run after all packages/binaries are installed.
+  provisioner "shell" {
+    script = "scripts/build-uki.sh"
+    environment_vars = [
+      "IMAGE_VERSION=${var.image_version}",
+      "SKIP_SIGNING=${var.skip_signing}",
+      "PCR_SIGNING_KEY=${var.pcr_signing_key}",
+    ]
+  }
+
+  # Sysupdate artifacts for CI publishing
+  provisioner "file" {
+    source      = "/usr_${var.image_version}.img"
+    destination = "build/worker/pigeon_${var.image_version}.usr.img"
+    direction   = "download"
+  }
+
+  provisioner "file" {
+    source      = "/boot/pigeon_${var.image_version}.efi"
+    destination = "build/worker/pigeon_${var.image_version}.efi"
+    direction   = "download"
   }
 
   provisioner "shell" {

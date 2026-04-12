@@ -1,24 +1,24 @@
 source "file" "enroll" {
-  path = "/encrypted/pigeon/enroll.json"
+  path = "/var/lib/pigeon/enroll.json"
 }
 
 # --- Mesh CA cert (for peer verification) + pre-issued leaf cert ---
 
 template {
   content     = "$${file.enroll.ca.mesh.cert_pem}"
-  destination = "/encrypted/pigeon/mesh-ca.crt"
+  destination = "/etc/pigeon/certs/mesh-ca.crt"
   perms       = "0600"
 }
 
 template {
   content     = "$${file.enroll.certs.mesh_worker.cert_pem}"
-  destination = "/encrypted/pigeon/mesh-cert.pem"
+  destination = "/etc/pigeon/certs/mesh-cert.pem"
   perms       = "0600"
 }
 
 template {
   content     = "$${file.enroll.certs.mesh_worker.key_pem}"
-  destination = "/encrypted/pigeon/mesh-key.pem"
+  destination = "/etc/pigeon/certs/mesh-key.pem"
   perms       = "0600"
 }
 
@@ -26,7 +26,7 @@ template {
 
 template {
   content     = "$${file.enroll.ca.vault.cert_pem}"
-  destination = "/encrypted/tls/vault/ca.crt"
+  destination = "/etc/vault.d/certs/ca.crt"
   perms       = "0644"
 }
 
@@ -34,7 +34,7 @@ template {
 
 template {
   content     = "$${file.enroll.ca.consul.cert_pem}"
-  destination = "/encrypted/tls/consul/ca.crt"
+  destination = "/etc/consul.d/certs/ca.crt"
   perms       = "0644"
 }
 
@@ -42,7 +42,7 @@ template {
 
 template {
   content     = "$${file.enroll.jwts.consul_auto_config}"
-  destination = "/encrypted/consul/intro-token.jwt"
+  destination = "/etc/consul.d/intro-token.jwt"
   perms       = "0600"
   user        = "consul"
   group       = "consul"
@@ -52,7 +52,7 @@ template {
 
 template {
   content     = "$${file.enroll.ca.nomad.cert_pem}"
-  destination = "/encrypted/tls/nomad/ca.crt"
+  destination = "/etc/nomad.d/certs/ca.crt"
   perms       = "0644"
 }
 
@@ -60,19 +60,19 @@ template {
 
 template {
   content     = "$${file.enroll.ca.auth.cert_pem}"
-  destination = "/encrypted/tls/auth/ca.crt"
+  destination = "/etc/pigeon/certs/auth/ca.crt"
   perms       = "0644"
 }
 
 template {
   content     = "$${file.enroll.certs.auth_worker.cert_pem}"
-  destination = "/encrypted/tls/auth/cert.pem"
+  destination = "/etc/pigeon/certs/auth/cert.pem"
   perms       = "0600"
 }
 
 template {
   content     = "$${file.enroll.certs.auth_worker.key_pem}"
-  destination = "/encrypted/tls/auth/key.pem"
+  destination = "/etc/pigeon/certs/auth/key.pem"
   perms       = "0600"
 }
 
@@ -80,19 +80,13 @@ template {
 
 template {
   source      = "/etc/pigeon/mesh.json.tpl"
-  destination = "/encrypted/pigeon/mesh.json"
-  perms       = "0600"
-}
-
-template {
-  source      = "/etc/pigeon/fence-ovh.hcl.tpl"
-  destination = "/encrypted/pigeon/fence.d/ovh.hcl"
+  destination = "/etc/pigeon/mesh.json"
   perms       = "0600"
 }
 
 template {
   source      = "/etc/pigeon/consul.hcl.tpl"
-  destination = "/encrypted/consul/consul.hcl"
+  destination = "/etc/consul.d/consul.hcl"
   perms       = "0640"
   user        = "consul"
   group       = "consul"
@@ -100,7 +94,7 @@ template {
 
 template {
   source      = "/etc/pigeon/nomad.hcl.tpl"
-  destination = "/encrypted/nomad/nomad.hcl"
+  destination = "/etc/nomad.d/nomad.hcl"
   perms       = "0640"
 }
 

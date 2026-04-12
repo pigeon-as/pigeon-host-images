@@ -1,6 +1,6 @@
 #!/bin/bash
 set -eu
-# Worker first-boot: LUKS setup + secret enrollment + config rendering via ConfigDrive user_data.
+# Worker first-boot: secret enrollment + config rendering via ConfigDrive user_data.
 
 ENROLL_URL="${file.enroll.vars.enroll_url}"
 ENROLL_TOKEN="${exec.enroll_token}"
@@ -9,8 +9,6 @@ ENROLL_CERT="${exec.enroll_cert}"
 : "${ENROLL_URL:?missing ENROLL_URL}"
 : "${ENROLL_TOKEN:?missing ENROLL_TOKEN}"
 : "${ENROLL_CERT:?missing ENROLL_CERT}"
-
-bash /usr/local/bin/configure-luks.sh
 
 # Generate unique hostname BEFORE claim so -subject = hostname.
 PETNAME=$(pigeon-petname)
@@ -28,7 +26,7 @@ pigeon-enroll claim \
   -tls "$CERT_FILE" \
   -scope worker \
   -subject "$$HOSTNAME" \
-  -output /encrypted/pigeon/enroll.json
+  -output /var/lib/pigeon/enroll.json
 
 # Render configs, extract CAs, generate leaf certs — all in one pass.
 pigeon-template --once --config=/etc/pigeon/bootstrap.tmpl.hcl

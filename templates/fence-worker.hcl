@@ -24,6 +24,24 @@ rule "allow_icmpv6_inbound" {
   comment   = "ICMPv6"
 }
 
+rule "allow_wireguard_inbound" {
+  provider  = provider.nftables
+  direction = "inbound"
+  protocol  = "udp"
+  dst_port  = ["51820"]
+  action    = "accept"
+  comment   = "WireGuard tunnel (crypto-authenticated)"
+}
+
+rule "allow_memberlist_inbound" {
+  provider  = provider.nftables
+  direction = "inbound"
+  protocol  = "tcp"
+  dst_port  = ["7946"]
+  action    = "accept"
+  comment   = "Memberlist gossip (symmetric-encrypted)"
+}
+
 rule "allow_bgp_inbound" {
   provider  = provider.nftables
   direction = "inbound"
@@ -176,7 +194,7 @@ rule "allow_forward_to_wg0" {
 rule "allow_forward_vm_egress" {
   provider  = provider.nftables
   direction = "forward"
-  source    = ["100.64.0.0/10"]
+  source    = ["100.64.0.0/24"]
   action    = "accept"
   comment   = "VM internet egress (CGNAT)"
 }

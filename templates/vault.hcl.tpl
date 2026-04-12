@@ -1,11 +1,21 @@
 ui = true
 
 listener "tcp" {
-  address         = "0.0.0.0:8200"
-  tls_cert_file   = "/encrypted/tls/vault/cert.pem"
-  tls_key_file    = "/encrypted/tls/vault/key.pem"
+  address         = "{{ GetInterfaceIP \"wg0\" }}:8200"
+  tls_cert_file   = "/etc/vault.d/certs/cert.pem"
+  tls_key_file    = "/etc/vault.d/certs/key.pem"
   tls_min_version = "tls12"
 }
+
+listener "tcp" {
+  address         = "127.0.0.1:8200"
+  tls_cert_file   = "/etc/vault.d/certs/cert.pem"
+  tls_key_file    = "/etc/vault.d/certs/key.pem"
+  tls_min_version = "tls12"
+}
+
+api_addr     = "https://vault.service.internal:8200"
+cluster_addr = "https://{{ GetInterfaceIP \"wg0\" }}:8201"
 
 storage "consul" {
   address = "127.0.0.1:8500"

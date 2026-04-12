@@ -2,12 +2,21 @@
 Description=pigeon-template reconciler
 After=unbound.service pigeon-mesh.service
 Wants=unbound.service pigeon-mesh.service
-ConditionPathExists=/encrypted/pigeon/enroll.json
+ConditionPathExists=/var/lib/pigeon/enroll.json
 
 [Service]
 ExecStart=/opt/pigeon/bin/pigeon-template --config=/etc/pigeon/reconcile.tmpl.hcl
 Restart=on-failure
 RestartSec=5
+NoNewPrivileges=yes
+ProtectSystem=full
+ReadWritePaths=/etc/unbound/
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+LimitCORE=0
 
 [Install]
 WantedBy=multi-user.target

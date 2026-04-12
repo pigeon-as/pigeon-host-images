@@ -1,0 +1,15 @@
+[Unit]
+Description=Initialize LVM thin pool from md2
+Documentation=https://github.com/pigeon-as/pigeon-host-images
+DefaultDependencies=no
+After=local-fs.target mdadm-last-resort@md2.service
+Before=nomad.service
+ConditionPathExists=!/var/lib/pigeon/lvm-pool-ready
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/bin/setup-lvm-pool.sh
+
+[Install]
+WantedBy=multi-user.target

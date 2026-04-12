@@ -17,9 +17,9 @@ client {
 tls {
   http      = true
   rpc       = true
-  ca_file   = "/encrypted/tls/nomad/ca.crt"
-  cert_file = "/encrypted/tls/nomad/cert.pem"
-  key_file  = "/encrypted/tls/nomad/key.pem"
+  ca_file   = "/etc/nomad.d/certs/ca.crt"
+  cert_file = "/etc/nomad.d/certs/cert.pem"
+  key_file  = "/etc/nomad.d/certs/key.pem"
   verify_server_hostname = true
 }
 
@@ -47,7 +47,7 @@ consul {
 vault {
   enabled          = true
   address          = "https://127.0.0.1:8200"
-  tls_ca_file      = "/encrypted/tls/vault/ca.crt"
+  tls_ca_file      = "/etc/vault.d/certs/ca.crt"
 
   default_identity {
     aud  = ["vault.io"]

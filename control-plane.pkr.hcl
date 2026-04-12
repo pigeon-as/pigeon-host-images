@@ -12,6 +12,22 @@ variable "ubuntu_version" {
   default = "24.04"
 }
 
+variable "image_version" {
+  type    = string
+  default = "0.0.0"
+}
+
+variable "skip_signing" {
+  type    = string
+  default = "true"
+}
+
+variable "pcr_signing_key" {
+  type      = string
+  default   = ""
+  sensitive = true
+}
+
 source "qemu" "control-plane" {
   iso_url      = "https://cloud-images.ubuntu.com/releases/${var.ubuntu_version}/release/ubuntu-${var.ubuntu_version}-server-cloudimg-amd64.img"
   iso_checksum = "file:https://cloud-images.ubuntu.com/releases/${var.ubuntu_version}/release/SHA256SUMS"
@@ -22,9 +38,16 @@ source "qemu" "control-plane" {
   format           = "qcow2"
   headless         = true
 
-  ssh_username = "root"
-  ssh_password = "packer"
-  ssh_timeout  = "10m"
+  accelerator = "kvm"
+  cpus        = 2
+  memory      = 2048
+  boot_wait   = "10s"
+
+  ssh_username           = "root"
+  ssh_password           = "packer"
+  ssh_timeout            = "10m"
+  ssh_wait_timeout       = "1h"
+  ssh_handshake_attempts = 500
 
   shutdown_command = "shutdown -P now"
   output_directory = "build/control-plane"
@@ -34,8 +57,7 @@ source "qemu" "control-plane" {
   cd_label = "cidata"
 
   qemuargs = [
-    ["-serial", "stdio"],
-    ["-m", "1024"],
+    ["-serial", "file:build/serial-control-plane.log"],
   ]
 }
 
@@ -59,13 +81,13 @@ build {
       "scripts/setup-pigeon.sh",
       "scripts/setup-pigeon-mesh.sh",
       "scripts/setup-pigeon-enroll.sh",
+      "scripts/setup-ek-ca.sh",
       "scripts/setup-pigeon-template.sh",
       "scripts/setup-pigeon-fence.sh",
       "scripts/setup-vault.sh",
       "scripts/setup-consul.sh",
       "scripts/setup-nomad.sh",
       "scripts/setup-unbound.sh",
-      "scripts/setup-unattended-upgrades.sh",
     ]
     environment_vars = [
       "PIGEON_MESH_VERSION=0.0.1-beta.1",
@@ -129,11 +151,6 @@ build {
   }
 
   provisioner "file" {
-    source      = "templates/fence-ovh.hcl.tpl"
-    destination = "/etc/pigeon/fence-ovh.hcl.tpl"
-  }
-
-  provisioner "file" {
     source      = "templates/consul-server.hcl.tpl"
     destination = "/etc/pigeon/consul-server.hcl.tpl"
   }
@@ -189,7 +206,47 @@ build {
   }
 
   provisioner "file" {
-    source      = "templates/nftables.conf"
+    source      = "templates/vault-agent-server.hcl"
+    destination = "/etc/pigeon/vault-agent.hcl"
+  }
+
+  provisioner "file" {
+    source      = "templates/vault-agent-server.service"
+    destination = "/etc/systemd/system/vault-agent.service"
+  }
+
+  provisioner "file" {
+    source      = "templates/consul-server-cert.ctmpl"
+    destination = "/etc/pigeon/consul-server-cert.ctmpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/consul-server-key.ctmpl"
+    destination = "/etc/pigeon/consul-server-key.ctmpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/nomad-server-cert.ctmpl"
+    destination = "/etc/pigeon/nomad-server-cert.ctmpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/nomad-server-key.ctmpl"
+    destination = "/etc/pigeon/nomad-server-key.ctmpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/vault-server-cert.ctmpl"
+    destination = "/etc/pigeon/vault-server-cert.ctmpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/vault-server-key.ctmpl"
+    destination = "/etc/pigeon/vault-server-key.ctmpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/nftables-server.conf"
     destination = "/etc/nftables.conf"
   }
 
@@ -214,29 +271,65 @@ build {
   }
 
   provisioner "file" {
-    source      = "scripts/configure-luks.sh"
-    destination = "/usr/local/bin/configure-luks.sh"
+    source      = "scripts/extract-ek-ca.sh"
+    destination = "/usr/local/bin/extract-ek-ca.sh"
   }
 
-  # Service state management — single source of truth.
-  # apt packages auto-enable during install; this block is the
-  # authoritative list of what runs on this image.
+  provisioner "shell" {
+    script = "scripts/setup-sysupdate.sh"
+  }
+
+  provisioner "file" {
+    source      = "templates/sysupdate-50-usr.transfer"
+    destination = "/usr/lib/sysupdate.d/50-usr.transfer"
+  }
+
+  provisioner "file" {
+    source      = "templates/sysupdate-70-uki.transfer"
+    destination = "/usr/lib/sysupdate.d/70-uki.transfer"
+  }
+
   provisioner "shell" {
     inline = [
+      "systemctl disable systemd-resolved",
+
       "systemctl enable nftables",
-      "systemctl enable unattended-upgrades",
       "systemctl enable pigeon-mesh",
       "systemctl enable pigeon-fence",
       "systemctl enable pigeon-enroll",
       "systemctl enable pigeon-template-bootstrap.path",
       "systemctl enable pigeon-template-reconcile",
       "systemctl enable pigeon-enroll-actions",
+      "systemctl enable vault-agent",
       "systemctl enable vault",
       "systemctl enable consul",
       "systemctl enable nomad",
       "systemctl enable unbound",
-      "systemctl disable systemd-resolved",
+      "systemctl enable systemd-bless-boot",
     ]
+  }
+
+  # Must run after all packages/binaries are installed.
+  provisioner "shell" {
+    script = "scripts/build-uki.sh"
+    environment_vars = [
+      "IMAGE_VERSION=${var.image_version}",
+      "SKIP_SIGNING=${var.skip_signing}",
+      "PCR_SIGNING_KEY=${var.pcr_signing_key}",
+    ]
+  }
+
+  # Download sysupdate artifacts for CI publishing to updates.pigeon.as
+  provisioner "file" {
+    source      = "/usr_${var.image_version}.img"
+    destination = "build/control-plane/pigeon_${var.image_version}.usr.img"
+    direction   = "download"
+  }
+
+  provisioner "file" {
+    source      = "/boot/pigeon_${var.image_version}.efi"
+    destination = "build/control-plane/pigeon_${var.image_version}.efi"
+    direction   = "download"
   }
 
   provisioner "shell" {

@@ -1,112 +1,142 @@
 source "file" "enroll" {
-  path = "/encrypted/pigeon/enroll.json"
+  path = "/var/lib/pigeon/enroll.json"
 }
 
 # --- Mesh TLS (CA cert for verification + pre-issued leaf cert) ---
 
 template {
   content     = "$${file.enroll.ca.mesh.cert_pem}"
-  destination = "/encrypted/pigeon/mesh-ca.crt"
+  destination = "/etc/pigeon/certs/mesh-ca.crt"
   perms       = "0600"
 }
 
 template {
   content     = "$${file.enroll.certs.mesh_server.cert_pem}"
-  destination = "/encrypted/pigeon/mesh-cert.pem"
+  destination = "/etc/pigeon/certs/mesh-cert.pem"
   perms       = "0600"
 }
 
 template {
   content     = "$${file.enroll.certs.mesh_server.key_pem}"
-  destination = "/encrypted/pigeon/mesh-key.pem"
+  destination = "/etc/pigeon/certs/mesh-key.pem"
   perms       = "0600"
 }
 
-# --- Vault CA + leaf cert ---
+# --- Vault TLS (CA cert + pre-issued leaf cert from enroll) ---
 
 template {
-  content     = <<-EOT
-$${file.enroll.ca.vault.cert_pem}
-$${file.enroll.ca.vault.private_key_pem}
-EOT
-  destination = "/encrypted/tls/vault/ca.pem"
+  content     = "$${file.enroll.ca.vault.cert_pem}"
+  destination = "/etc/vault.d/certs/ca.crt"
   perms       = "0600"
-  command     = <<-EOC
-    (
-      set -e
-      pigeon-enroll generate-cert -from-ca /encrypted/tls/vault/ca.pem \
-        -cn $(hostname) \
-        -dns localhost -dns vault.service.internal -dns active.vault.service.internal \
-        -ip 127.0.0.1 -ttl 720h \
-        -cert /encrypted/tls/vault/cert.pem \
-        -key /encrypted/tls/vault/key.pem \
-        -ca /encrypted/tls/vault/ca.crt
-      chown vault:vault /encrypted/tls/vault/{ca.crt,cert.pem,key.pem}
-    )
-  EOC
+  user        = "vault"
+  group       = "vault"
 }
 
-# --- Consul CA + leaf cert ---
-
 template {
-  content     = <<-EOT
-$${file.enroll.ca.consul.cert_pem}
-$${file.enroll.ca.consul.private_key_pem}
-EOT
-  destination = "/encrypted/tls/consul/ca.pem"
+  content     = "$${file.enroll.certs.vault_server.cert_pem}"
+  destination = "/etc/vault.d/certs/cert.pem"
   perms       = "0600"
-  command     = <<-EOC
-    (
-      set -e
-      pigeon-enroll generate-cert -from-ca /encrypted/tls/consul/ca.pem \
-        -cn $(hostname) \
-        -dns localhost -dns server.$${file.enroll.vars.datacenter}.internal \
-        -ip 127.0.0.1 -ttl 720h \
-        -cert /encrypted/tls/consul/cert.pem \
-        -key /encrypted/tls/consul/key.pem \
-        -ca /encrypted/tls/consul/ca.crt
-      chown consul:consul /encrypted/tls/consul/{ca.crt,cert.pem,key.pem}
-    )
-  EOC
+  user        = "vault"
+  group       = "vault"
 }
 
-# --- Nomad CA + leaf cert ---
+template {
+  content     = "$${file.enroll.certs.vault_server.key_pem}"
+  destination = "/etc/vault.d/certs/key.pem"
+  perms       = "0600"
+  user        = "vault"
+  group       = "vault"
+}
+
+# --- Consul TLS (CA cert + pre-issued leaf cert from enroll) ---
+
+template {
+  content     = "$${file.enroll.ca.consul.cert_pem}"
+  destination = "/etc/consul.d/certs/ca.crt"
+  perms       = "0600"
+  user        = "consul"
+  group       = "consul"
+}
+
+template {
+  content     = "$${file.enroll.certs.consul_server.cert_pem}"
+  destination = "/etc/consul.d/certs/cert.pem"
+  perms       = "0600"
+  user        = "consul"
+  group       = "consul"
+}
+
+template {
+  content     = "$${file.enroll.certs.consul_server.key_pem}"
+  destination = "/etc/consul.d/certs/key.pem"
+  perms       = "0600"
+  user        = "consul"
+  group       = "consul"
+}
+
+# --- Nomad TLS (CA cert + pre-issued leaf cert from enroll) ---
+
+template {
+  content     = "$${file.enroll.ca.nomad.cert_pem}"
+  destination = "/etc/nomad.d/certs/ca.crt"
+  perms       = "0600"
+}
+
+template {
+  content     = "$${file.enroll.certs.nomad_server.cert_pem}"
+  destination = "/etc/nomad.d/certs/cert.pem"
+  perms       = "0600"
+}
+
+template {
+  content     = "$${file.enroll.certs.nomad_server.key_pem}"
+  destination = "/etc/nomad.d/certs/key.pem"
+  perms       = "0600"
+}
+
+# --- Auth TLS (CA cert + pre-issued leaf cert for vault-agent cert auth) ---
+
+template {
+  content     = "$${file.enroll.ca.auth.cert_pem}"
+  destination = "/etc/pigeon/certs/auth/ca.crt"
+  perms       = "0600"
+}
+
+template {
+  content     = "$${file.enroll.certs.auth_server.cert_pem}"
+  destination = "/etc/pigeon/certs/auth/cert.pem"
+  perms       = "0600"
+}
+
+template {
+  content     = "$${file.enroll.certs.auth_server.key_pem}"
+  destination = "/etc/pigeon/certs/auth/key.pem"
+  perms       = "0600"
+}
+
+# --- Vault Agent environment (datacenter/region for PKI cert SANs) ---
 
 template {
   content     = <<-EOT
-$${file.enroll.ca.nomad.cert_pem}
-$${file.enroll.ca.nomad.private_key_pem}
+PIGEON_DATACENTER=$${file.enroll.vars.datacenter}
+PIGEON_REGION=$${file.enroll.vars.region}
 EOT
-  destination = "/encrypted/tls/nomad/ca.pem"
+  destination = "/etc/pigeon/vault-agent.env"
   perms       = "0600"
-  command     = <<-EOC
-    pigeon-enroll generate-cert -from-ca /encrypted/tls/nomad/ca.pem \
-      -cn $(hostname) \
-      -dns localhost -dns server.$${file.enroll.vars.region}.nomad \
-      -ip 127.0.0.1 -ttl 720h \
-      -cert /encrypted/tls/nomad/cert.pem \
-      -key /encrypted/tls/nomad/key.pem \
-      -ca /encrypted/tls/nomad/ca.crt
-  EOC
+  command     = "systemctl start vault-agent"
 }
 
 # --- Service configs ---
 
 template {
   source      = "/etc/pigeon/mesh.json.tpl"
-  destination = "/encrypted/pigeon/mesh.json"
-  perms       = "0600"
-}
-
-template {
-  source      = "/etc/pigeon/fence-ovh.hcl.tpl"
-  destination = "/encrypted/pigeon/fence.d/ovh.hcl"
+  destination = "/etc/pigeon/mesh.json"
   perms       = "0600"
 }
 
 template {
   source      = "/etc/pigeon/consul-server.hcl.tpl"
-  destination = "/encrypted/consul/consul.hcl"
+  destination = "/etc/consul.d/consul.hcl"
   perms       = "0640"
   user        = "consul"
   group       = "consul"
@@ -114,13 +144,13 @@ template {
 
 template {
   source      = "/etc/pigeon/nomad-server.hcl.tpl"
-  destination = "/encrypted/nomad/nomad.hcl"
+  destination = "/etc/nomad.d/nomad.hcl"
   perms       = "0640"
 }
 
 template {
   source      = "/etc/pigeon/vault.hcl.tpl"
-  destination = "/encrypted/vault/vault.hcl"
+  destination = "/etc/vault.d/vault.hcl"
   perms       = "0640"
   user        = "vault"
   group       = "vault"

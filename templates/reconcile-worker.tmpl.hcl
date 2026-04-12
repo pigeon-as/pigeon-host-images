@@ -1,5 +1,5 @@
 source "file" "enroll" {
-  path = "/encrypted/pigeon/enroll.json"
+  path = "/var/lib/pigeon/enroll.json"
 }
 
 source "exec" "peers" {
