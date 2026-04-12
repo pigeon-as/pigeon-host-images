@@ -69,7 +69,7 @@ console-mode keep
 EOF
 
 # Copy versioned UKI with boot counting (3 tries before fallback)
-UKI=$(ls -v /boot/pigeon_*.efi 2>/dev/null | tail -1)
+UKI=$(ls -v /boot/pigeon_*.efi 2>/dev/null | tail -1 || true)
 if [ -z "${UKI}" ]; then
   echo "FATAL: no UKI found in /boot/pigeon_*.efi" >&2
   exit 1

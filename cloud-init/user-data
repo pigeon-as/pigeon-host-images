@@ -1,4 +1,5 @@
 #cloud-config
+# Root password "packer" (hashed)
 users:
   - name: root
     lock_passwd: false
