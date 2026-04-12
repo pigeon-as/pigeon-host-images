@@ -231,6 +231,20 @@ build {
     destination = "/etc/modprobe.d/99-pigeon-kvm.conf"
   }
 
+  provisioner "file" {
+    source      = "scripts/setup-lvm-pool.sh"
+    destination = "/usr/local/bin/setup-lvm-pool.sh"
+  }
+
+  provisioner "shell" {
+    inline = ["chmod 0755 /usr/local/bin/setup-lvm-pool.sh"]
+  }
+
+  provisioner "file" {
+    source      = "templates/setup-lvm-pool.service"
+    destination = "/etc/systemd/system/setup-lvm-pool.service"
+  }
+
   provisioner "shell" {
     script = "scripts/setup-sysupdate.sh"
   }
@@ -259,6 +273,7 @@ build {
       "systemctl disable systemd-resolved",
 
       "systemctl enable nftables",
+      "systemctl enable setup-lvm-pool",
       "systemctl enable pigeon-mesh",
       "systemctl enable pigeon-fence",
       "systemctl enable pigeon-template-reconcile",
