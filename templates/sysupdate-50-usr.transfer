@@ -6,7 +6,7 @@ ProtectVersion=%A
 
 [Source]
 Type=url-file
-Path=https://updates.pigeon.as/
+Path=https://sysupdate.infra.pigeon.as/
 MatchPattern=pigeon_@v.usr.img
 
 [Target]
