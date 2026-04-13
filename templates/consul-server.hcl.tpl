@@ -35,6 +35,7 @@ acl {
   default_policy           = "deny"
   enable_token_persistence = true
 
+  # HVD: management token for both initial_management and agent on servers.
   tokens {
     initial_management = "${file.enroll.secrets.consul_bootstrap_token}"
     agent              = "${file.enroll.secrets.consul_bootstrap_token}"

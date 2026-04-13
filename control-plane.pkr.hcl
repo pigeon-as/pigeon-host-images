@@ -85,6 +85,7 @@ build {
       "scripts/setup-pigeon-template.sh",
       "scripts/setup-pigeon-fence.sh",
       "scripts/setup-vault.sh",
+      "scripts/setup-vault-storage.sh",
       "scripts/setup-consul.sh",
       "scripts/setup-nomad.sh",
       "scripts/setup-unbound.sh",

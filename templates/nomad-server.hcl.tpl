@@ -29,6 +29,7 @@ addresses {
   serf = "{{ GetInterfaceIP \"wg0\" }}"
 }
 
+# HVD: management token for server Consul registration. Workloads use WI.
 consul {
   address = "127.0.0.1:8500"
   token   = "${file.enroll.secrets.consul_bootstrap_token}"
