@@ -10,6 +10,13 @@ template {
   perms       = "0600"
 }
 
+# Preserved HKDF mesh CA for vault-agent CA bundle template
+template {
+  content     = "$${file.enroll.ca.mesh.cert_pem}"
+  destination = "/etc/pigeon/certs/mesh-enroll-ca.crt"
+  perms       = "0600"
+}
+
 template {
   content     = "$${file.enroll.certs.mesh_worker.cert_pem}"
   destination = "/etc/pigeon/certs/mesh-cert.pem"
@@ -22,7 +29,15 @@ template {
   perms       = "0600"
 }
 
-# --- Vault CA cert (workers verify server TLS, no leaf cert needed) ---
+# --- Bootstrap CA cert (shared trust root for vault/consul/nomad/auth during stage 0) ---
+
+template {
+  content     = "$${file.enroll.ca.bootstrap.cert_pem}"
+  destination = "/etc/pigeon/certs/bootstrap-ca.crt"
+  perms       = "0644"
+}
+
+# --- Vault CA cert (workers verify Vault server TLS, no leaf cert needed) ---
 
 template {
   content     = "$${file.enroll.ca.vault.cert_pem}"
@@ -30,10 +45,10 @@ template {
   perms       = "0644"
 }
 
-# --- Consul CA cert (auto_config handles leaf certs) ---
+# --- Consul CA cert (bootstrap CA — auto_config handles leaf certs) ---
 
 template {
-  content     = "$${file.enroll.ca.consul.cert_pem}"
+  content     = "$${file.enroll.ca.bootstrap.cert_pem}"
   destination = "/etc/consul.d/certs/ca.crt"
   perms       = "0644"
 }
@@ -48,18 +63,18 @@ template {
   group       = "consul"
 }
 
-# --- Nomad CA cert (trust only — vault-agent issues leaf certs from Vault PKI) ---
+# --- Nomad CA cert (bootstrap CA — vault-agent issues runtime certs from Vault PKI) ---
 
 template {
-  content     = "$${file.enroll.ca.nomad.cert_pem}"
+  content     = "$${file.enroll.ca.bootstrap.cert_pem}"
   destination = "/etc/nomad.d/certs/ca.crt"
   perms       = "0644"
 }
 
-# --- Auth CA cert + leaf cert (server-issued during claim, for vault-agent cert auth) ---
+# --- Auth cert + key (bootstrap-CA-signed, for vault-agent cert auth) ---
 
 template {
-  content     = "$${file.enroll.ca.auth.cert_pem}"
+  content     = "$${file.enroll.ca.bootstrap.cert_pem}"
   destination = "/etc/pigeon/certs/auth/ca.crt"
   perms       = "0644"
 }

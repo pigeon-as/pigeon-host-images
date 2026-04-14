@@ -12,6 +12,14 @@ UKI + LUKS sealed to TPM2 PolicyAuthorize (PCR 11). Immutable /usr via dm-verity
 
 Workers present TPM EK to pigeon-enroll before receiving secrets. EK validated against manufacturer CA certs or hash allowlist (SPIRE pattern).
 
+## TLS — Stage 0 / Stage 1
+
+All service TLS is automatic and self-healing. Bootstrap CA handles initial boot; Vault PKI takes over once the platform stack is applied. vault-agent on every node issues 24h certs from four PKI intermediates (auth, mesh, consul, nomad) and reloads services on renewal. See [docs/tls.md](docs/tls.md).
+
+## DNS
+
+Unbound on every node: local recursive resolver, authoritative infra zone (rendered from mesh peers), `.internal` stub forwarding to Consul DNS.
+
 ## Build
 
 ```bash

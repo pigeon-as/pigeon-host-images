@@ -167,6 +167,36 @@ build {
   }
 
   provisioner "file" {
+    source      = "templates/nomad-ca.ctmpl"
+    destination = "/etc/pigeon/nomad-ca.ctmpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/mesh-cert.ctmpl"
+    destination = "/etc/pigeon/mesh-cert.ctmpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/mesh-key.ctmpl"
+    destination = "/etc/pigeon/mesh-key.ctmpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/mesh-ca.ctmpl"
+    destination = "/etc/pigeon/mesh-ca.ctmpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/auth-cert.ctmpl"
+    destination = "/etc/pigeon/auth-cert.ctmpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/auth-key.ctmpl"
+    destination = "/etc/pigeon/auth-key.ctmpl"
+  }
+
+  provisioner "file" {
     source      = "templates/vault-agent.service"
     destination = "/etc/systemd/system/vault-agent.service"
   }

@@ -1,4 +1,0 @@
-{{ $cn := printf "common_name=%s" (env "HOSTNAME") -}}
-{{ with pkiCert "pki_vault/issue/vault-server" $cn "ttl=720h" "alt_names=vault.service.internal,active.vault.service.internal,localhost" "ip_sans=127.0.0.1" -}}
-{{ .Key }}
-{{- end }}

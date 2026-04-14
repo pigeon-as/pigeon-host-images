@@ -10,6 +10,13 @@ template {
   perms       = "0600"
 }
 
+# Preserved HKDF mesh CA for vault-agent CA bundle template
+template {
+  content     = "$${file.enroll.ca.mesh.cert_pem}"
+  destination = "/etc/pigeon/certs/mesh-enroll-ca.crt"
+  perms       = "0600"
+}
+
 template {
   content     = "$${file.enroll.certs.mesh_server.cert_pem}"
   destination = "/etc/pigeon/certs/mesh-cert.pem"
@@ -22,7 +29,15 @@ template {
   perms       = "0600"
 }
 
-# --- Vault TLS (CA cert + pre-issued leaf cert from enroll) ---
+# --- Bootstrap CA cert (shared trust root for vault/consul/nomad/auth during stage 0) ---
+
+template {
+  content     = "$${file.enroll.ca.bootstrap.cert_pem}"
+  destination = "/etc/pigeon/certs/bootstrap-ca.crt"
+  perms       = "0644"
+}
+
+# --- Vault TLS (Vault CA + pre-issued leaf cert from enroll) ---
 
 template {
   content     = "$${file.enroll.ca.vault.cert_pem}"
@@ -48,10 +63,10 @@ template {
   group       = "vault"
 }
 
-# --- Consul TLS (CA cert + pre-issued leaf cert from enroll) ---
+# --- Consul TLS (bootstrap CA + pre-issued leaf cert from enroll) ---
 
 template {
-  content     = "$${file.enroll.ca.consul.cert_pem}"
+  content     = "$${file.enroll.ca.bootstrap.cert_pem}"
   destination = "/etc/consul.d/certs/ca.crt"
   perms       = "0600"
   user        = "consul"
@@ -74,10 +89,10 @@ template {
   group       = "consul"
 }
 
-# --- Nomad TLS (CA cert + pre-issued leaf cert from enroll) ---
+# --- Nomad TLS (bootstrap CA + pre-issued leaf cert from enroll) ---
 
 template {
-  content     = "$${file.enroll.ca.nomad.cert_pem}"
+  content     = "$${file.enroll.ca.bootstrap.cert_pem}"
   destination = "/etc/nomad.d/certs/ca.crt"
   perms       = "0600"
 }
@@ -94,10 +109,10 @@ template {
   perms       = "0600"
 }
 
-# --- Auth TLS (CA cert + pre-issued leaf cert for vault-agent cert auth) ---
+# --- Auth TLS (bootstrap CA + pre-issued leaf cert for vault-agent cert auth) ---
 
 template {
-  content     = "$${file.enroll.ca.auth.cert_pem}"
+  content     = "$${file.enroll.ca.bootstrap.cert_pem}"
   destination = "/etc/pigeon/certs/auth/ca.crt"
   perms       = "0600"
 }

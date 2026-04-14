@@ -237,13 +237,38 @@ build {
   }
 
   provisioner "file" {
-    source      = "templates/vault-server-cert.ctmpl"
-    destination = "/etc/pigeon/vault-server-cert.ctmpl"
+    source      = "templates/consul-ca.ctmpl"
+    destination = "/etc/pigeon/consul-ca.ctmpl"
   }
 
   provisioner "file" {
-    source      = "templates/vault-server-key.ctmpl"
-    destination = "/etc/pigeon/vault-server-key.ctmpl"
+    source      = "templates/nomad-ca.ctmpl"
+    destination = "/etc/pigeon/nomad-ca.ctmpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/mesh-server-cert.ctmpl"
+    destination = "/etc/pigeon/mesh-server-cert.ctmpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/mesh-server-key.ctmpl"
+    destination = "/etc/pigeon/mesh-server-key.ctmpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/mesh-ca.ctmpl"
+    destination = "/etc/pigeon/mesh-ca.ctmpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/auth-server-cert.ctmpl"
+    destination = "/etc/pigeon/auth-server-cert.ctmpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/auth-server-key.ctmpl"
+    destination = "/etc/pigeon/auth-server-key.ctmpl"
   }
 
   provisioner "file" {
