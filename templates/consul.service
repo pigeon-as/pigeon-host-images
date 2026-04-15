@@ -11,6 +11,8 @@ StartLimitBurst=5
 Type=notify
 User=consul
 Group=consul
+RuntimeDirectory=consul
+RuntimeDirectoryMode=0755
 ExecStart=/usr/bin/consul agent -config-dir=/etc/consul.d
 ExecReload=/bin/kill -HUP $MAINPID
 KillMode=process

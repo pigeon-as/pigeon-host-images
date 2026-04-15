@@ -28,7 +28,7 @@ storage "raft" {
 }
 
 service_registration "consul" {
-  address = "127.0.0.1:8500"
+  address = "unix:///run/consul/consul.sock"
   token   = "${file.enroll.secrets.consul_bootstrap_token}"
 }
 
@@ -41,3 +41,6 @@ seal "azurekeyvault" {
 }
 
 disable_mlock = true
+
+default_lease_ttl = "768h"
+max_lease_ttl     = "768h"

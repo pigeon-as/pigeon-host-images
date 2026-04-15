@@ -23,6 +23,7 @@ ProtectKernelTunables=yes
 ProtectKernelModules=yes
 ExecStart=/usr/bin/vault server -config=/etc/vault.d
 ExecReload=/bin/kill -HUP $MAINPID
+Environment="VAULT_ENABLE_FILE_PERMISSIONS_CHECK=true"
 KillMode=process
 KillSignal=SIGINT
 TimeoutStopSec=30
