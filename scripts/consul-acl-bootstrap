@@ -1,0 +1,28 @@
+#!/bin/bash
+# Register the Nomad agent token in Consul ACL. Idempotent: the policy and
+# token reads short-circuit if they already exist.
+set -euo pipefail
+
+export CONSUL_HTTP_ADDR="https://127.0.0.1:8501"
+export CONSUL_CACERT=/etc/consul.d/certs/ca.crt
+
+BOOTSTRAP_TOKEN=$(pigeon-enroll read secret/consul_bootstrap_token)
+AGENT_TOKEN=$(pigeon-enroll read secret/consul_agent_token)
+
+CONSUL_HTTP_TOKEN=$BOOTSTRAP_TOKEN \
+  consul acl policy read -name nomad-agent >/dev/null 2>&1 \
+  || CONSUL_HTTP_TOKEN=$BOOTSTRAP_TOKEN consul acl policy create \
+    -name nomad-agent \
+    -description "Nomad agent token policy (node/service write, agent read)" \
+    -rules - <<'EOF' >/dev/null
+agent_prefix "" { policy = "read" }
+node_prefix "" { policy = "write" }
+service_prefix "" { policy = "write" }
+EOF
+
+CONSUL_HTTP_TOKEN=$AGENT_TOKEN \
+  consul acl token read -self >/dev/null 2>&1 \
+  || CONSUL_HTTP_TOKEN=$BOOTSTRAP_TOKEN consul acl token create \
+    -description "Nomad agent token (HKDF-derived)" \
+    -policy-name nomad-agent \
+    -secret "$AGENT_TOKEN" >/dev/null

@@ -137,18 +137,38 @@ build {
   }
 
   provisioner "file" {
-    source      = "templates/bootstrap-worker.tmpl.hcl"
-    destination = "/etc/pigeon/bootstrap.tmpl.hcl"
+    source      = "templates/bootstrap-worker.hcl"
+    destination = "/etc/pigeon/bootstrap.hcl"
   }
 
   provisioner "file" {
-    source      = "templates/reconcile-worker.tmpl.hcl"
-    destination = "/etc/pigeon/reconcile.tmpl.hcl"
+    source      = "templates/reconcile-worker.hcl"
+    destination = "/etc/pigeon/reconcile.hcl"
   }
 
   provisioner "file" {
-    source      = "templates/pigeon-template-reconcile.service"
+    source      = "templates/pigeon-template-reconcile-worker.service"
     destination = "/etc/systemd/system/pigeon-template-reconcile.service"
+  }
+
+  provisioner "file" {
+    source      = "templates/pigeon-template-bootstrap-worker.service"
+    destination = "/etc/systemd/system/pigeon-template-bootstrap.service"
+  }
+
+  provisioner "file" {
+    source      = "templates/pigeon-template-bootstrap.path"
+    destination = "/etc/systemd/system/pigeon-template-bootstrap.path"
+  }
+
+  provisioner "file" {
+    source      = "scripts/luks-recovery"
+    destination = "/usr/local/bin/luks-recovery"
+  }
+
+  provisioner "file" {
+    source      = "templates/luks-recovery-worker.service"
+    destination = "/etc/systemd/system/luks-recovery.service"
   }
 
   provisioner "file" {
@@ -302,11 +322,15 @@ build {
       "systemctl disable vault",
       "systemctl disable systemd-resolved",
 
+      "chmod 0755 /usr/local/bin/luks-recovery",
+
       "systemctl enable nftables",
       "systemctl enable setup-lvm-pool",
       "systemctl enable pigeon-mesh",
       "systemctl enable pigeon-fence",
+      "systemctl enable pigeon-template-bootstrap.path",
       "systemctl enable pigeon-template-reconcile",
+      "systemctl enable luks-recovery",
       "systemctl enable unbound",
       "systemctl enable systemd-bless-boot",
       "systemctl enable consul",

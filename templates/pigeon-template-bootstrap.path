@@ -1,8 +1,8 @@
 [Unit]
-Description=Watch for pigeon enrollment secrets
+Description=Trigger pigeon-template bootstrap when the identity cert is provisioned
 
 [Path]
-PathExists=/var/lib/pigeon/enroll.json
+PathExists=/etc/pigeon/identity/cert.pem
 Unit=pigeon-template-bootstrap.service
 
 [Install]

@@ -112,18 +112,13 @@ build {
   }
 
   provisioner "file" {
-    source      = "templates/pigeon-template-bootstrap.service"
+    source      = "templates/pigeon-template-bootstrap-server.service"
     destination = "/etc/systemd/system/pigeon-template-bootstrap.service"
   }
 
   provisioner "file" {
-    source      = "templates/pigeon-template-reconcile.service"
+    source      = "templates/pigeon-template-reconcile-server.service"
     destination = "/etc/systemd/system/pigeon-template-reconcile.service"
-  }
-
-  provisioner "file" {
-    source      = "templates/pigeon-template-bootstrap.path"
-    destination = "/etc/systemd/system/pigeon-template-bootstrap.path"
   }
 
   provisioner "file" {
@@ -132,13 +127,13 @@ build {
   }
 
   provisioner "file" {
-    source      = "templates/bootstrap-server.tmpl.hcl"
-    destination = "/etc/pigeon/bootstrap.tmpl.hcl"
+    source      = "templates/bootstrap-server.hcl"
+    destination = "/etc/pigeon/bootstrap.hcl"
   }
 
   provisioner "file" {
-    source      = "templates/reconcile-server.tmpl.hcl"
-    destination = "/etc/pigeon/reconcile.tmpl.hcl"
+    source      = "templates/reconcile-server.hcl"
+    destination = "/etc/pigeon/reconcile.hcl"
   }
 
   provisioner "file" {
@@ -186,6 +181,22 @@ build {
     destination = "/etc/pigeon/setup-worker.sh.tpl"
   }
 
+  # JSON bundles served by pigeon-enroll via `read template/enroll-*`.
+  provisioner "file" {
+    source      = "templates/enroll-server.json.tpl"
+    destination = "/etc/pigeon/templates/enroll-server.json.tpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/enroll-worker.json.tpl"
+    destination = "/etc/pigeon/templates/enroll-worker.json.tpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/pigeon-template-bootstrap.path"
+    destination = "/etc/systemd/system/pigeon-template-bootstrap.path"
+  }
+
   provisioner "file" {
     source      = "templates/vault.service"
     destination = "/etc/systemd/system/vault.service"
@@ -202,8 +213,33 @@ build {
   }
 
   provisioner "file" {
-    source      = "templates/pigeon-enroll-actions.service"
-    destination = "/etc/systemd/system/pigeon-enroll-actions.service"
+    source      = "scripts/consul-acl-bootstrap"
+    destination = "/usr/local/bin/consul-acl-bootstrap"
+  }
+
+  provisioner "file" {
+    source      = "templates/consul-acl-bootstrap.service"
+    destination = "/etc/systemd/system/consul-acl-bootstrap.service"
+  }
+
+  provisioner "file" {
+    source      = "scripts/vault-init"
+    destination = "/usr/local/bin/vault-init"
+  }
+
+  provisioner "file" {
+    source      = "templates/vault-init.service"
+    destination = "/etc/systemd/system/vault-init.service"
+  }
+
+  provisioner "file" {
+    source      = "scripts/luks-recovery"
+    destination = "/usr/local/bin/luks-recovery"
+  }
+
+  provisioner "file" {
+    source      = "templates/luks-recovery-server.service"
+    destination = "/etc/systemd/system/luks-recovery.service"
   }
 
   provisioner "file" {
@@ -319,13 +355,17 @@ build {
     inline = [
       "systemctl disable systemd-resolved",
 
+      "chmod 0755 /usr/local/bin/vault-init /usr/local/bin/luks-recovery /usr/local/bin/consul-acl-bootstrap",
+
       "systemctl enable nftables",
       "systemctl enable pigeon-mesh",
       "systemctl enable pigeon-fence",
       "systemctl enable pigeon-enroll",
       "systemctl enable pigeon-template-bootstrap.path",
       "systemctl enable pigeon-template-reconcile",
-      "systemctl enable pigeon-enroll-actions",
+      "systemctl enable consul-acl-bootstrap",
+      "systemctl enable vault-init",
+      "systemctl enable luks-recovery",
       "systemctl enable vault-agent",
       "systemctl enable vault",
       "systemctl enable consul",

@@ -98,7 +98,7 @@ pigeon-enroll derive → secrets + bootstrap certs on disk
   → Consul starts (bootstrap cert, mTLS)
   → Vault starts (bootstrap cert, HTTPS)
   → vault-init action (initialize + management token)
-  → consul-acl action (register Nomad agent token in Consul ACL)
+  → consul-acl-bootstrap.service (register Nomad agent token in Consul ACL via consul acl CLI)
   → Terraform platform stack (Vault PKI mounts, cert auth, policies)
   → vault-agent starts → issues Vault-PKI certs + CA bundles
   → Consul/Nomad reload (now using 24h Vault PKI certs)
