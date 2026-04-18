@@ -1,4 +1,5 @@
 {
+  "role": "control-plane",
   "seeds": ${file.enroll.vars.mesh_seeds},
   "gossip_key": "${file.enroll.secrets.gossip_key}",
   "endpoint_interface": "eth0",

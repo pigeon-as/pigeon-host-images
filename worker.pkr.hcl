@@ -122,7 +122,7 @@ build {
   }
 
   provisioner "file" {
-    source      = "templates/mesh.json.tpl"
+    source      = "templates/mesh-worker.json.tpl"
     destination = "/etc/pigeon/mesh.json.tpl"
   }
 
@@ -287,12 +287,8 @@ build {
   }
 
   provisioner "file" {
-    source      = "scripts/setup-lvm-pool.sh"
-    destination = "/usr/local/bin/setup-lvm-pool.sh"
-  }
-
-  provisioner "shell" {
-    inline = ["chmod 0755 /usr/local/bin/setup-lvm-pool.sh"]
+    source      = "scripts/setup-lvm-pool"
+    destination = "/usr/local/bin/setup-lvm-pool"
   }
 
   provisioner "file" {
@@ -322,12 +318,18 @@ build {
     ]
   }
 
+  # File provisioner doesn't preserve +x when the build host has git
+  # core.fileMode=false (Windows default); chmod explicitly.
+  provisioner "shell" {
+    inline = [
+      "chmod 0755 /usr/local/bin/luks-recovery /usr/local/bin/setup-lvm-pool",
+    ]
+  }
+
   provisioner "shell" {
     inline = [
       "systemctl disable vault",
       "systemctl disable systemd-resolved",
-
-      "chmod 0755 /usr/local/bin/luks-recovery",
 
       "systemctl enable nftables",
       "systemctl enable setup-lvm-pool",

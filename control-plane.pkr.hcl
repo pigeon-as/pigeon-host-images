@@ -142,7 +142,7 @@ build {
   }
 
   provisioner "file" {
-    source      = "templates/mesh.json.tpl"
+    source      = "templates/mesh-server.json.tpl"
     destination = "/etc/pigeon/mesh.json.tpl"
   }
 
@@ -338,8 +338,8 @@ build {
   }
 
   provisioner "file" {
-    source      = "scripts/extract-ek-ca.sh"
-    destination = "/usr/local/bin/extract-ek-ca.sh"
+    source      = "scripts/extract-ek-ca"
+    destination = "/usr/local/bin/extract-ek-ca"
   }
 
   provisioner "shell" {
@@ -356,11 +356,17 @@ build {
     destination = "/usr/lib/sysupdate.d/70-uki.transfer"
   }
 
+  # File provisioner doesn't preserve +x when the build host has git
+  # core.fileMode=false (Windows default); chmod explicitly.
+  provisioner "shell" {
+    inline = [
+      "chmod 0755 /usr/local/bin/consul-acl-bootstrap /usr/local/bin/vault-init /usr/local/bin/luks-recovery /usr/local/bin/extract-ek-ca",
+    ]
+  }
+
   provisioner "shell" {
     inline = [
       "systemctl disable systemd-resolved",
-
-      "chmod 0755 /usr/local/bin/vault-init /usr/local/bin/luks-recovery /usr/local/bin/consul-acl-bootstrap",
 
       "systemctl enable nftables",
       "systemctl enable pigeon-mesh",
