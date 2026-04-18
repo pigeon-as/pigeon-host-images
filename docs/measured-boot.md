@@ -55,8 +55,8 @@ Key rotation (rare): `systemd-cryptenroll --tpm2-public-key=<new>` on each node.
 If TPM2 fails to unseal (e.g., hardware failure):
 
 ```bash
-# Use HKDF-derived recovery passphrase (added by pigeon-enroll luks-recovery action)
+# Use the HKDF-derived recovery passphrase added by luks-recovery.service
 cryptsetup open /dev/md1 root
 ```
 
-The recovery passphrase is derived from the enrollment key via HKDF and added to LUKS keyslot 1 by pigeon-enroll's `luks-recovery` action after first successful boot.
+The recovery passphrase is derived from the enrollment key via HKDF and added to LUKS keyslot 1 by `luks-recovery.service` (`/usr/local/bin/luks-recovery`) after `pigeon-template-reconcile` has the identity cert in place.
