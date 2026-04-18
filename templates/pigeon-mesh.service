@@ -3,9 +3,13 @@ Description=pigeon-mesh WireGuard overlay
 After=network-online.target
 Wants=network-online.target
 ConditionPathExists=/etc/pigeon/mesh.json
+ConditionPathExists=/etc/credstore.encrypted/pigeon-mesh.gossip-key
 
 [Service]
-ExecStart=/opt/pigeon/bin/pigeon-mesh --config=/etc/pigeon/mesh.json
+ExecStart=/opt/pigeon/bin/pigeon-mesh \
+  --config=/etc/pigeon/mesh.json \
+  --gossip-key-path=%d/gossip-key
+LoadCredentialEncrypted=gossip-key:/etc/credstore.encrypted/pigeon-mesh.gossip-key
 Restart=on-failure
 RestartSec=5
 

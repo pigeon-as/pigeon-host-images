@@ -15,6 +15,24 @@ source "exec" "enroll_token" {
   interval = "10m"
 }
 
+# Seal the gossip key to the host's TPM for pigeon-mesh's LoadCredentialEncrypted.
+# Pure side-effect exec — pipes plaintext from pigeon-enroll straight into
+# systemd-creds without ever touching disk, then `systemctl start` (no-op if
+# already running, triggers ConditionPathExists=credstore gate on first boot).
+# Steady-state re-seals are harmless: fresh IV each tick, same plaintext; Serf
+# owns the running keyring via its own KeyManager, so restarts aren't needed
+# for rotation.
+source "exec" "seal_gossip_key" {
+  command  = <<-EOT
+    set -euo pipefail
+    mkdir -p /etc/credstore.encrypted
+    pigeon-enroll read secret/gossip_key \
+      | systemd-creds encrypt --with-key=tpm2 --name=gossip-key - /etc/credstore.encrypted/pigeon-mesh.gossip-key
+    systemctl start pigeon-mesh
+  EOT
+  interval = "6h"
+}
+
 # Keep enroll.json fresh: if it's deleted or the server rotates vars/secrets,
 # the next tick writes a new bundle and downstream templates re-render.
 source "exec" "refresh_enroll_json" {
