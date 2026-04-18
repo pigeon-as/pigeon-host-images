@@ -1,0 +1,9 @@
+[Unit]
+Description=Start vault-agent once the stage-0 auth leaf exists
+
+[Path]
+PathExists=/etc/pigeon/certs/auth/cert.pem
+Unit=vault-agent.service
+
+[Install]
+WantedBy=multi-user.target

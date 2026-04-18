@@ -137,11 +137,6 @@ build {
   }
 
   provisioner "file" {
-    source      = "templates/bootstrap-worker.hcl"
-    destination = "/etc/pigeon/bootstrap.hcl"
-  }
-
-  provisioner "file" {
     source      = "templates/reconcile-worker.hcl"
     destination = "/etc/pigeon/reconcile.hcl"
   }
@@ -152,13 +147,23 @@ build {
   }
 
   provisioner "file" {
-    source      = "templates/pigeon-template-bootstrap-worker.service"
-    destination = "/etc/systemd/system/pigeon-template-bootstrap.service"
+    source      = "templates/pigeon-template.path"
+    destination = "/etc/systemd/system/pigeon-template.path"
   }
 
   provisioner "file" {
-    source      = "templates/pigeon-template-bootstrap.path"
-    destination = "/etc/systemd/system/pigeon-template-bootstrap.path"
+    source      = "templates/pigeon-identity-ensure-worker.service"
+    destination = "/etc/systemd/system/pigeon-identity-ensure.service"
+  }
+
+  provisioner "file" {
+    source      = "templates/pigeon-fence.path"
+    destination = "/etc/systemd/system/pigeon-fence.path"
+  }
+
+  provisioner "file" {
+    source      = "templates/vault-agent.path"
+    destination = "/etc/systemd/system/vault-agent.path"
   }
 
   provisioner "file" {
@@ -328,8 +333,11 @@ build {
       "systemctl enable setup-lvm-pool",
       "systemctl enable pigeon-mesh",
       "systemctl enable pigeon-fence",
-      "systemctl enable pigeon-template-bootstrap.path",
+      "systemctl enable pigeon-template.path",
       "systemctl enable pigeon-template-reconcile",
+      "systemctl enable pigeon-identity-ensure",
+      "systemctl enable pigeon-fence.path",
+      "systemctl enable vault-agent.path",
       "systemctl enable luks-recovery",
       "systemctl enable unbound",
       "systemctl enable systemd-bless-boot",

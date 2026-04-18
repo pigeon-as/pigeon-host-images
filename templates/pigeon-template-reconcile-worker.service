@@ -1,19 +1,20 @@
 [Unit]
 Description=pigeon-template reconciler
-After=pigeon-template-bootstrap.service unbound.service pigeon-mesh.service
-Wants=unbound.service pigeon-mesh.service
+After=pigeon-enroll.service network-online.target unbound.service pigeon-mesh.service
+Wants=network-online.target unbound.service pigeon-mesh.service
 ConditionPathExists=/etc/pigeon/identity/cert.pem
 
 [Service]
 EnvironmentFile=/etc/pigeon/enroll.env
 Environment=ENROLL_CACERT=/etc/pigeon/identity/ca.pem
 Environment=ENROLL_IDENTITY_DIR=/etc/pigeon/identity
+ExecStartPre=/opt/pigeon/bin/pigeon-enroll read template/enroll-worker -o /var/lib/pigeon/enroll.json
 ExecStart=/opt/pigeon/bin/pigeon-template --config=/etc/pigeon/reconcile.hcl
 Restart=on-failure
 RestartSec=5
 NoNewPrivileges=yes
 ProtectSystem=full
-ReadWritePaths=/etc/unbound/ /var/lib/pigeon/
+ReadWritePaths=/etc/pigeon/ /etc/consul.d/ /etc/nomad.d/ /etc/resolv.conf /etc/unbound/ /var/lib/pigeon/
 ProtectHome=yes
 PrivateTmp=yes
 PrivateDevices=yes

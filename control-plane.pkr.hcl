@@ -112,11 +112,6 @@ build {
   }
 
   provisioner "file" {
-    source      = "templates/pigeon-template-bootstrap-server.service"
-    destination = "/etc/systemd/system/pigeon-template-bootstrap.service"
-  }
-
-  provisioner "file" {
     source      = "templates/pigeon-template-reconcile-server.service"
     destination = "/etc/systemd/system/pigeon-template-reconcile.service"
   }
@@ -127,8 +122,13 @@ build {
   }
 
   provisioner "file" {
-    source      = "templates/bootstrap-server.hcl"
-    destination = "/etc/pigeon/bootstrap.hcl"
+    source      = "templates/pigeon-fence.path"
+    destination = "/etc/systemd/system/pigeon-fence.path"
+  }
+
+  provisioner "file" {
+    source      = "templates/vault-agent.path"
+    destination = "/etc/systemd/system/vault-agent.path"
   }
 
   provisioner "file" {
@@ -193,8 +193,13 @@ build {
   }
 
   provisioner "file" {
-    source      = "templates/pigeon-template-bootstrap.path"
-    destination = "/etc/systemd/system/pigeon-template-bootstrap.path"
+    source      = "templates/pigeon-template.path"
+    destination = "/etc/systemd/system/pigeon-template.path"
+  }
+
+  provisioner "file" {
+    source      = "templates/pigeon-identity-ensure-server.service"
+    destination = "/etc/systemd/system/pigeon-identity-ensure.service"
   }
 
   provisioner "file" {
@@ -361,8 +366,11 @@ build {
       "systemctl enable pigeon-mesh",
       "systemctl enable pigeon-fence",
       "systemctl enable pigeon-enroll",
-      "systemctl enable pigeon-template-bootstrap.path",
+      "systemctl enable pigeon-template.path",
       "systemctl enable pigeon-template-reconcile",
+      "systemctl enable pigeon-identity-ensure",
+      "systemctl enable pigeon-fence.path",
+      "systemctl enable vault-agent.path",
       "systemctl enable consul-acl-bootstrap",
       "systemctl enable vault-init",
       "systemctl enable luks-recovery",

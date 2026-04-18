@@ -2,7 +2,7 @@
 Description=pigeon-enroll secret enrollment server
 After=network-online.target
 Wants=network-online.target
-Before=pigeon-template-bootstrap.service pigeon-template-reconcile.service vault.service consul.service nomad.service pigeon-mesh.service pigeon-fence.service
+Before=pigeon-template-reconcile.service vault.service consul.service nomad.service pigeon-mesh.service pigeon-fence.service
 ConditionPathExists=/etc/credstore.encrypted/pigeon-enroll.enrollment-key
 ConditionPathExists=/etc/pigeon/enroll-server.hcl
 

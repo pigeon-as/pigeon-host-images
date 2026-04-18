@@ -4,16 +4,17 @@ Two stages. Stage 0 gets services running. Stage 1 replaces bootstrap certs with
 
 ## Stage 0 — Bootstrap CA
 
-pigeon-enroll derives a bootstrap CA from the enrollment key via HKDF. During the first ~60 seconds of boot, this CA signs all service TLS certs:
+pigeon-enroll derives three CAs from the enrollment key via HKDF: `identity` (mTLS to the enroll server), `mesh` (pigeon-mesh overlay), `bootstrap` (stage-0 service leaves), and `vault` (Vault's own long-lived TLS). During the first ~60 seconds of boot, these CAs sign all service TLS certs:
 
 | Cert | Signed by | TTL | Purpose |
 |------|-----------|-----|---------|
-| Vault server | Bootstrap CA | 10 years | Vault's own TLS (permanent — never rotated by vault-agent) |
-| Consul server | Bootstrap CA | 720h | Temporary — replaced by stage 1 |
-| Nomad server | Bootstrap CA | 720h | Temporary — replaced by stage 1 |
-| Auth server | Bootstrap CA | 720h | Temporary — vault-agent replaces with 24h Vault PKI cert |
+| Vault server | Vault CA | 10 years | Vault's own TLS (permanent — never rotated by vault-agent) |
+| Mesh server/worker | Mesh CA | 720h | Replaced at stage 1 |
+| Consul server | Bootstrap CA | 720h | Replaced at stage 1 |
+| Nomad server | Bootstrap CA | 720h | Replaced at stage 1 |
+| Auth server/worker | Bootstrap CA | 720h | vault-agent replaces with 24h Vault PKI cert |
 
-Stage 0 ends when Terraform applies the platform stack (Vault PKI mounts + vault-agent config).
+Leaf certs are issued by `pigeon-template-reconcile.service` running `pigeon-enroll issue pki/<role> -renew-before=1h` on a 30s tick — idempotent (no-op when the cert is valid for >1h), private keys never leave the host, deletion auto-heals on the next tick. Stage 0 ends when Terraform applies the platform stack (Vault PKI mounts + vault-agent config) and vault-agent overwrites the same paths with Vault-PKI-signed certs.
 
 ## Stage 1 — Vault PKI
 
@@ -94,23 +95,60 @@ Vault must be running for vault-agent to issue certs. If vault-agent managed Vau
 ### Control-plane
 
 ```
-pigeon-enroll derive → secrets + bootstrap certs on disk
-  → Consul starts (bootstrap cert, mTLS)
-  → Vault starts (bootstrap cert, HTTPS)
-  → vault-init action (initialize + management token)
-  → consul-acl-bootstrap.service (register Nomad agent token in Consul ACL via consul acl CLI)
+pigeon-enroll.service starts (TPM-sealed enrollment key via systemd-creds)
+  → Terraform SSH register → /etc/pigeon/identity/{cert,key,ca}.pem
+    (on subsequent boots when cert.pem is missing, pigeon-identity-ensure
+     calls register without a token; the server recognises the EK binding)
+  → pigeon-template.path fires on identity cert
+  → pigeon-template-reconcile.service (long-running):
+      · pigeon-enroll read template/enroll-server → /var/lib/pigeon/enroll.json
+      · pigeon-enroll issue pki/{mesh,auth,vault,consul,nomad}_server -renew-before=1h (stage-0 leaves)
+      · renders CA files, JWT pubkey, service configs
+      · fires `systemctl start vault` / consul / nomad / unbound / pigeon-mesh / vault-agent as each config lands
+  → pigeon-fence.path fires on enroll.json → starts pigeon-fence
+  → vault-agent.path fires on stage-0 auth leaf → starts vault-agent
+  → vault-init.service initializes Vault + management token
+  → consul-acl-bootstrap.service registers Nomad agent token
   → Terraform platform stack (Vault PKI mounts, cert auth, policies)
-  → vault-agent starts → issues Vault-PKI certs + CA bundles
-  → Consul/Nomad reload (now using 24h Vault PKI certs)
+  → vault-agent issues Vault-PKI certs + dual-CA bundles; consul/nomad reload
   → pigeon-mesh reloads mesh certs on next TLS handshake
 ```
 
 ### Worker
 
 ```
-pigeon-enroll claim → secrets + bootstrap certs on disk
-  → Consul starts (auto_config gets cert from servers)
-  → vault-agent starts → issues nomad-client cert + mesh cert + CA bundles
-  → Nomad starts (nomad-cert.path triggers once cert appears)
+cloud-init user_data (setup-worker.sh rendered by control-plane reconcile):
+  · hostnamectl, write /etc/pigeon/enroll.env, pigeon-enroll register (with token)
+    (on subsequent boots with cert.pem missing, pigeon-identity-ensure
+     re-registers without a token via TPM rebootstrap)
+  → pigeon-template.path fires on identity cert
+  → pigeon-template-reconcile.service: stage-0 leaves (mesh_worker + auth_worker),
+    CAs, JWT (auto_config intro token), service configs
+  → pigeon-fence.path fires on enroll.json → starts pigeon-fence
+  → vault-agent.path fires on stage-0 auth leaf → starts vault-agent
+  → nomad-cert.path fires once vault-agent issues the Vault-PKI nomad-client cert
+  → luks-recovery.service adds the HKDF-derived LUKS recovery passphrase
   → pigeon-mesh reloads mesh certs on next TLS handshake
 ```
+
+## Self-healing
+
+All heal paths align with established reference projects: cert-manager (reconcile-based, heal-if-missing), step-ca (`--renew-before` / `needs-renewal` duration semantics), and SPIRE (`rebootstrap_mode=auto` — re-run the original TPM NodeAttestor, no operator token).
+
+**What heals automatically:**
+
+- **Service config deletion.** reconcile.service re-renders `vault.hcl`, `consul.hcl`, `nomad.hcl`, `mesh.json`, `unbound.conf`, `resolv.conf`, `vault-agent.env` continuously from the enroll bundle. Delete any of these files mid-life and they come back within the next reconcile tick, with the matching `systemctl start X` hook firing if the service had stopped.
+- **CA file deletion.** Same — CA files (`mesh-ca.crt`, `bootstrap-ca.crt`, `vault.d/certs/ca.crt`, etc.) are re-rendered by reconcile from `pigeon-enroll read ca/*` exec sources.
+- **enroll.json deletion.** reconcile's `refresh_enroll_json` exec source re-fetches the vars/secrets bundle from `pigeon-enroll read template/enroll-<role>` at a 1h interval (or faster if fsnotify detects deletion and pigeon-template refetches).
+- **Stage-0 leaf cert deletion.** reconcile runs `pigeon-enroll issue pki/<role> -renew-before=1h` on a 30s tick for every stage-0 leaf. When the cert is valid for more than 1h the call is a silent no-op; when the cert is missing or near expiry it re-issues. After vault-agent has taken over, the issued stage-0 cert is immediately overwritten by vault-agent's next render — brief churn, self-corrects.
+- **Identity cert deletion (SPIRE rebootstrap).** `pigeon-identity-ensure.service` runs on boot when `/etc/pigeon/identity/cert.pem` is missing and `ca.pem` indicates a prior registration. It calls `pigeon-enroll register` **without a token**; the server recognises the TPM EK from its binding store (EK→identity recorded at first register) and reissues on TPM credential-activation alone. No sealed backup, no operator action.
+- **Stage-1 cert expiry.** vault-agent rotates at 50% lifetime (24h TTL → 12h renewal window). Service reloads on cert change via ctmpl `command` hooks.
+- **Service crashes.** Each service has `Restart=on-failure`; systemd brings them back.
+- **Reboots.** Everything rederivable from the enrollment key + the TPM. Stage-0 leaves are re-issued fresh by reconcile; identity is restored by pigeon-identity-ensure if missing; vault-agent rotates in stage-1 shortly after.
+
+**What does NOT heal automatically:**
+
+- **Whole `/etc/pigeon/identity/` deleted (including ca.pem).** `pigeon-identity-ensure` is gated by `ca.pem` existence; without it, `ENROLL_CACERT` can't be loaded. Operator runs Terraform (or re-runs cloud-init on workers) to re-deliver the identity CA and kick off a normal register.
+- **Loss of the enrollment key itself.** Catastrophic and intentional — this is the root trust. Re-run `terraform apply` to redeliver the same key from Terraform state; all HKDF-derived CAs remain valid.
+- **Binding store lost on the enroll server.** The server would require a fresh HMAC token for rebootstrap until bindings re-accumulate. Back up `/var/lib/pigeon/enroll-bindings` with the rest of the control-plane state.
+- **Vault permanently broken.** Stage-0 leaves expire at 30 days. Beyond that, services fail TLS and the cluster degrades.

@@ -1,7 +1,7 @@
 [Unit]
 Description=Add LUKS recovery passphrase to the boot volume
-After=pigeon-template-bootstrap.service
-Requires=pigeon-template-bootstrap.service
+After=pigeon-template-reconcile.service
+ConditionPathExists=/etc/pigeon/identity/cert.pem
 
 [Service]
 Type=oneshot
