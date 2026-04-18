@@ -1,7 +1,7 @@
 {
+  "role": "control-plane",
   "seeds": ${file.enroll.vars.mesh_seeds},
   "gossip_key": "${file.enroll.secrets.gossip_key}",
-  "wg_psk": "${file.enroll.secrets.wg_psk}",
   "endpoint_interface": "eth0",
   "egress_cidr": "${file.enroll.vars.egress_cidr}",
   "datacenter": "${file.enroll.vars.datacenter}",

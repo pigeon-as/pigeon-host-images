@@ -1,0 +1,9 @@
+[Unit]
+Description=Start pigeon-fence once reconcile has fetched enroll.json
+
+[Path]
+PathExists=/var/lib/pigeon/enroll.json
+Unit=pigeon-fence.service
+
+[Install]
+WantedBy=multi-user.target

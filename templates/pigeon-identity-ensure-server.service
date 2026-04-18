@@ -1,0 +1,31 @@
+[Unit]
+Description=Ensure identity cert exists (SPIRE-style TPM rebootstrap)
+# Only runs when cert.pem is missing AND we have prior registration evidence
+# (ca.pem survived). On a pristine first boot both are absent and this
+# service is skipped — Terraform's register step handles initial enrollment.
+ConditionPathExists=!/etc/pigeon/identity/cert.pem
+ConditionPathExists=/etc/pigeon/identity/ca.pem
+After=pigeon-enroll.service network-online.target
+Wants=network-online.target
+Before=pigeon-template.path pigeon-template-reconcile.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+Environment=ENROLL_ADDR=127.0.0.1:8443
+Environment=ENROLL_CACERT=/etc/pigeon/identity/ca.pem
+Environment=ENROLL_IDENTITY_DIR=/etc/pigeon/identity
+# No -token: the server recognises this EK from its binding store and
+# reissues the cert on TPM attestation alone.
+ExecStart=/opt/pigeon/bin/pigeon-enroll register -identity=control_plane -subject=%H
+NoNewPrivileges=yes
+ProtectSystem=full
+ReadWritePaths=/etc/pigeon/identity/
+ProtectHome=yes
+PrivateTmp=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+LimitCORE=0
+
+[Install]
+WantedBy=multi-user.target

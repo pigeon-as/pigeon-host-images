@@ -1,0 +1,19 @@
+#!/bin/bash
+# Add the HKDF-derived recovery passphrase to the LUKS2 boot volume.
+# Idempotent: exits 0 if the passphrase is already a valid keyslot.
+set -euo pipefail
+
+DEVICE=/dev/md1
+MAPPED=root
+RECOVERY=$(pigeon-enroll read secret/luks_recovery)
+
+echo -n "$RECOVERY" | cryptsetup luksOpen --test-passphrase "$DEVICE" 2>/dev/null && exit 0
+
+VK=$(mktemp)
+trap 'shred -u "$VK"' EXIT
+dmsetup table --showkeys -- "$MAPPED" | awk '{print $5}' | xxd -r -p > "$VK"
+
+echo -n "$RECOVERY" | cryptsetup luksAddKey \
+  --volume-key-file="$VK" \
+  --batch-mode \
+  -- "$DEVICE"

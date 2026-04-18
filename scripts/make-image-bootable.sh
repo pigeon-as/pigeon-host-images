@@ -19,7 +19,7 @@ systemd-machine-id-setup
 
 # LUKS format md1 with throwaway passphrase (discarded after TPM enrollment)
 LUKS_PASS=$(dd if=/dev/urandom bs=32 count=1 2>/dev/null | base64 -w0)
-echo -n "$LUKS_PASS" | cryptsetup luksFormat --type luks2 --batch-mode --key-file=- /dev/md1
+echo -n "$LUKS_PASS" | cryptsetup luksFormat --type luks2 --pbkdf argon2id --batch-mode --key-file=- /dev/md1
 echo -n "$LUKS_PASS" | cryptsetup open --type luks2 --key-file=- /dev/md1 root
 
 # Create and populate root filesystem (btrfs for checksumming + compression)

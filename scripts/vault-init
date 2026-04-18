@@ -1,0 +1,26 @@
+#!/bin/bash
+# One-shot Vault initialization. Idempotent: exits 0 if already initialized.
+# The management token id is HKDF-derived (secret/vault_management_token), so
+# any node can reconstruct it without persisting it anywhere.
+set -euo pipefail
+
+export VAULT_ADDR="https://127.0.0.1:8200"
+export VAULT_CACERT=/etc/vault.d/certs/ca.crt
+
+vault operator init -status >/dev/null 2>&1 && exit 0
+
+INIT=$(vault operator init -format=json -recovery-shares=1 -recovery-threshold=1)
+ROOT=$(echo "$INIT" | jq -r .root_token)
+MGMT=$(pigeon-enroll read secret/vault_management_token)
+
+VAULT_TOKEN=$ROOT vault token create \
+  -id="$MGMT" \
+  -policy=root \
+  -no-default-policy \
+  -orphan \
+  -display-name=pigeon-management >/dev/null
+
+VAULT_TOKEN=$ROOT vault token revoke -self
+
+echo "$INIT" | jq 'del(.root_token)' > /var/lib/pigeon/vault-init.json
+chmod 0600 /var/lib/pigeon/vault-init.json

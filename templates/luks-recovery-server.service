@@ -1,0 +1,15 @@
+[Unit]
+Description=Add LUKS recovery passphrase to the boot volume
+After=pigeon-template-reconcile.service
+ConditionPathExists=/etc/pigeon/identity/cert.pem
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+Environment=ENROLL_ADDR=127.0.0.1:8443
+Environment=ENROLL_CACERT=/etc/pigeon/identity/ca.pem
+Environment=ENROLL_IDENTITY_DIR=/etc/pigeon/identity
+ExecStart=/usr/local/bin/luks-recovery
+
+[Install]
+WantedBy=multi-user.target

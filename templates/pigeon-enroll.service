@@ -2,19 +2,20 @@
 Description=pigeon-enroll secret enrollment server
 After=network-online.target
 Wants=network-online.target
-Before=pigeon-template-bootstrap.service pigeon-template-reconcile.service vault.service consul.service nomad.service pigeon-mesh.service pigeon-fence.service
-ConditionPathExists=/etc/pigeon/enrollment-key
+Before=pigeon-template-reconcile.service vault.service consul.service nomad.service pigeon-mesh.service pigeon-fence.service
+ConditionPathExists=/etc/credstore.encrypted/pigeon-enroll.enrollment-key
 ConditionPathExists=/etc/pigeon/enroll-server.hcl
 
 [Service]
-ExecStart=/opt/pigeon/bin/pigeon-enroll server -config=/etc/pigeon/enroll-server.hcl
-# Disable SSH after enrollment server starts — enrollment key has been delivered,
-# SSH is no longer needed. Survives reboot (disabled, not just stopped).
+ExecStart=/opt/pigeon/bin/pigeon-enroll server -config=/etc/pigeon/enroll-server.hcl -key-path=%d/enrollment-key
+LoadCredentialEncrypted=enrollment-key:/etc/credstore.encrypted/pigeon-enroll.enrollment-key
 ExecStartPost=+/usr/bin/systemctl disable --now ssh.service
 Restart=on-failure
 RestartSec=5
+StateDirectory=pigeon-enroll
 NoNewPrivileges=yes
-ProtectSystem=full
+ProtectSystem=strict
+ReadWritePaths=/var/lib/pigeon
 ProtectHome=yes
 PrivateTmp=yes
 PrivateDevices=yes

@@ -6,7 +6,10 @@ server = false
 bind_addr   = "{{ GetInterfaceIP \"wg0\" }}"
 client_addr = "127.0.0.1"
 
+leave_on_terminate = true
+
 addresses {
+  http  = "unix:///run/consul/consul.sock"
   https = "127.0.0.1 {{ GetInterfaceIP \"wg0\" }}"
   dns   = "127.0.0.1 {{ GetInterfaceIP \"wg0\" }}"
 }
@@ -36,8 +39,9 @@ tls {
   }
 }
 
+# HVD: disable plaintext HTTP listener. Local access via unix socket.
 ports {
   dns   = 8600
-  http  = 8500
+  http  = -1
   https = 8501
 }

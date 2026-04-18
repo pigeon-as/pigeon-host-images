@@ -85,6 +85,7 @@ build {
       "scripts/setup-pigeon-template.sh",
       "scripts/setup-pigeon-fence.sh",
       "scripts/setup-vault.sh",
+      "scripts/setup-vault-storage.sh",
       "scripts/setup-consul.sh",
       "scripts/setup-nomad.sh",
       "scripts/setup-unbound.sh",
@@ -111,18 +112,8 @@ build {
   }
 
   provisioner "file" {
-    source      = "templates/pigeon-template-bootstrap.service"
-    destination = "/etc/systemd/system/pigeon-template-bootstrap.service"
-  }
-
-  provisioner "file" {
-    source      = "templates/pigeon-template-reconcile.service"
+    source      = "templates/pigeon-template-reconcile-server.service"
     destination = "/etc/systemd/system/pigeon-template-reconcile.service"
-  }
-
-  provisioner "file" {
-    source      = "templates/pigeon-template-bootstrap.path"
-    destination = "/etc/systemd/system/pigeon-template-bootstrap.path"
   }
 
   provisioner "file" {
@@ -131,13 +122,18 @@ build {
   }
 
   provisioner "file" {
-    source      = "templates/bootstrap-server.tmpl.hcl"
-    destination = "/etc/pigeon/bootstrap.tmpl.hcl"
+    source      = "templates/pigeon-fence.path"
+    destination = "/etc/systemd/system/pigeon-fence.path"
   }
 
   provisioner "file" {
-    source      = "templates/reconcile-server.tmpl.hcl"
-    destination = "/etc/pigeon/reconcile.tmpl.hcl"
+    source      = "templates/vault-agent.path"
+    destination = "/etc/systemd/system/vault-agent.path"
+  }
+
+  provisioner "file" {
+    source      = "templates/reconcile-server.hcl"
+    destination = "/etc/pigeon/reconcile.hcl"
   }
 
   provisioner "file" {
@@ -146,7 +142,7 @@ build {
   }
 
   provisioner "file" {
-    source      = "templates/mesh.json.tpl"
+    source      = "templates/mesh-server.json.tpl"
     destination = "/etc/pigeon/mesh.json.tpl"
   }
 
@@ -185,6 +181,27 @@ build {
     destination = "/etc/pigeon/setup-worker.sh.tpl"
   }
 
+  # JSON bundles served by pigeon-enroll via `read template/enroll-*`.
+  provisioner "file" {
+    source      = "templates/enroll-server.json.tpl"
+    destination = "/etc/pigeon/templates/enroll-server.json.tpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/enroll-worker.json.tpl"
+    destination = "/etc/pigeon/templates/enroll-worker.json.tpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/pigeon-template.path"
+    destination = "/etc/systemd/system/pigeon-template.path"
+  }
+
+  provisioner "file" {
+    source      = "templates/pigeon-identity-ensure-server.service"
+    destination = "/etc/systemd/system/pigeon-identity-ensure.service"
+  }
+
   provisioner "file" {
     source      = "templates/vault.service"
     destination = "/etc/systemd/system/vault.service"
@@ -201,8 +218,33 @@ build {
   }
 
   provisioner "file" {
-    source      = "templates/pigeon-enroll-actions.service"
-    destination = "/etc/systemd/system/pigeon-enroll-actions.service"
+    source      = "scripts/consul-acl-bootstrap"
+    destination = "/usr/local/bin/consul-acl-bootstrap"
+  }
+
+  provisioner "file" {
+    source      = "templates/consul-acl-bootstrap.service"
+    destination = "/etc/systemd/system/consul-acl-bootstrap.service"
+  }
+
+  provisioner "file" {
+    source      = "scripts/vault-init"
+    destination = "/usr/local/bin/vault-init"
+  }
+
+  provisioner "file" {
+    source      = "templates/vault-init.service"
+    destination = "/etc/systemd/system/vault-init.service"
+  }
+
+  provisioner "file" {
+    source      = "scripts/luks-recovery"
+    destination = "/usr/local/bin/luks-recovery"
+  }
+
+  provisioner "file" {
+    source      = "templates/luks-recovery-server.service"
+    destination = "/etc/systemd/system/luks-recovery.service"
   }
 
   provisioner "file" {
@@ -236,13 +278,38 @@ build {
   }
 
   provisioner "file" {
-    source      = "templates/vault-server-cert.ctmpl"
-    destination = "/etc/pigeon/vault-server-cert.ctmpl"
+    source      = "templates/consul-ca.ctmpl"
+    destination = "/etc/pigeon/consul-ca.ctmpl"
   }
 
   provisioner "file" {
-    source      = "templates/vault-server-key.ctmpl"
-    destination = "/etc/pigeon/vault-server-key.ctmpl"
+    source      = "templates/nomad-ca.ctmpl"
+    destination = "/etc/pigeon/nomad-ca.ctmpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/mesh-server-cert.ctmpl"
+    destination = "/etc/pigeon/mesh-server-cert.ctmpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/mesh-server-key.ctmpl"
+    destination = "/etc/pigeon/mesh-server-key.ctmpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/mesh-ca.ctmpl"
+    destination = "/etc/pigeon/mesh-ca.ctmpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/auth-server-cert.ctmpl"
+    destination = "/etc/pigeon/auth-server-cert.ctmpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/auth-server-key.ctmpl"
+    destination = "/etc/pigeon/auth-server-key.ctmpl"
   }
 
   provisioner "file" {
@@ -271,8 +338,8 @@ build {
   }
 
   provisioner "file" {
-    source      = "scripts/extract-ek-ca.sh"
-    destination = "/usr/local/bin/extract-ek-ca.sh"
+    source      = "scripts/extract-ek-ca"
+    destination = "/usr/local/bin/extract-ek-ca"
   }
 
   provisioner "shell" {
@@ -289,6 +356,14 @@ build {
     destination = "/usr/lib/sysupdate.d/70-uki.transfer"
   }
 
+  # File provisioner doesn't preserve +x when the build host has git
+  # core.fileMode=false (Windows default); chmod explicitly.
+  provisioner "shell" {
+    inline = [
+      "chmod 0755 /usr/local/bin/consul-acl-bootstrap /usr/local/bin/vault-init /usr/local/bin/luks-recovery /usr/local/bin/extract-ek-ca",
+    ]
+  }
+
   provisioner "shell" {
     inline = [
       "systemctl disable systemd-resolved",
@@ -297,9 +372,14 @@ build {
       "systemctl enable pigeon-mesh",
       "systemctl enable pigeon-fence",
       "systemctl enable pigeon-enroll",
-      "systemctl enable pigeon-template-bootstrap.path",
+      "systemctl enable pigeon-template.path",
       "systemctl enable pigeon-template-reconcile",
-      "systemctl enable pigeon-enroll-actions",
+      "systemctl enable pigeon-identity-ensure",
+      "systemctl enable pigeon-fence.path",
+      "systemctl enable vault-agent.path",
+      "systemctl enable consul-acl-bootstrap",
+      "systemctl enable vault-init",
+      "systemctl enable luks-recovery",
       "systemctl enable vault-agent",
       "systemctl enable vault",
       "systemctl enable consul",

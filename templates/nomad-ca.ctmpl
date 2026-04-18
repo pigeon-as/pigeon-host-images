@@ -1,0 +1,4 @@
+{{ with secret "pki/cert/ca" -}}
+{{ .Data.certificate }}
+{{ end -}}
+{{ file "/etc/pigeon/certs/bootstrap-ca.crt" -}}

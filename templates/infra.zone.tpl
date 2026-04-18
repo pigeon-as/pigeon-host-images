@@ -1,9 +1,9 @@
 ; Infrastructure DNS zone — rendered by pigeon-template from mesh peers.
-; Reload: unbound-control auth_zone_reload ${file.enroll.vars.domain}
-$ORIGIN ${file.enroll.vars.domain}.
+; Reload: unbound-control auth_zone_reload ${exec.domain}
+$ORIGIN ${exec.domain}.
 $TTL 300
 
-@  IN SOA servers.${file.enroll.vars.domain}. admin.${file.enroll.vars.domain}. (
+@  IN SOA servers.${exec.domain}. admin.${exec.domain}. (
     1       ; serial
     3600    ; refresh
     900     ; retry
@@ -34,5 +34,19 @@ servers.${peer.datacenter}  IN  AAAA  ${peer.overlay_addr}
 %{ for peer in jsondecode(exec.peers) ~}
 %{ if peer.role == "control-plane" ~}
 servers  IN  AAAA  ${peer.overlay_addr}
+%{ endif ~}
+%{ endfor ~}
+
+; DC group — enroll.<dc>.infra.pigeon.as (round-robin)
+%{ for peer in jsondecode(exec.peers) ~}
+%{ if peer.role == "enroll" ~}
+enroll.${peer.datacenter}  IN  AAAA  ${peer.overlay_addr}
+%{ endif ~}
+%{ endfor ~}
+
+; Global group — enroll.infra.pigeon.as (all enroll nodes)
+%{ for peer in jsondecode(exec.peers) ~}
+%{ if peer.role == "enroll" ~}
+enroll  IN  AAAA  ${peer.overlay_addr}
 %{ endif ~}
 %{ endfor ~}

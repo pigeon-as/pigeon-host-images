@@ -1,0 +1,9 @@
+[Unit]
+Description=Start pigeon-template reconcile once identity cert is provisioned
+
+[Path]
+PathExists=/etc/pigeon/identity/cert.pem
+Unit=pigeon-template-reconcile.service
+
+[Install]
+WantedBy=multi-user.target

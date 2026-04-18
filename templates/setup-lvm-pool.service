@@ -9,7 +9,7 @@ ConditionPathExists=!/var/lib/pigeon/lvm-pool-ready
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-ExecStart=/usr/local/bin/setup-lvm-pool.sh
+ExecStart=/usr/local/bin/setup-lvm-pool
 
 [Install]
 WantedBy=multi-user.target

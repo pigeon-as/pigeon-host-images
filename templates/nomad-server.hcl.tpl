@@ -1,9 +1,11 @@
 datacenter = "${file.enroll.vars.datacenter}"
 region     = "${file.enroll.vars.region}"
+data_dir   = "/opt/nomad/data"
 
 server {
   enabled          = true
   bootstrap_expect = 3
+  encrypt          = "${file.enroll.secrets.nomad_gossip_key}"
 
   server_join {
     retry_join = ["servers.${file.enroll.vars.domain}"]
@@ -29,8 +31,9 @@ addresses {
   serf = "{{ GetInterfaceIP \"wg0\" }}"
 }
 
+# HVD: management token for server Consul registration. Workloads use WI.
 consul {
-  address = "127.0.0.1:8500"
+  address = "unix:///run/consul/consul.sock"
   token   = "${file.enroll.secrets.consul_bootstrap_token}"
 
   service_identity {
@@ -59,4 +62,12 @@ vault {
 
 acl {
   enabled = true
+}
+
+telemetry {
+  collection_interval        = "1s"
+  disable_hostname           = true
+  prometheus_metrics          = true
+  publish_allocation_metrics = true
+  publish_node_metrics       = true
 }

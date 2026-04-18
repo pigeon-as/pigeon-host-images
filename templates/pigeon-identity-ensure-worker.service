@@ -1,0 +1,27 @@
+[Unit]
+Description=Ensure identity cert exists (SPIRE-style TPM rebootstrap)
+ConditionPathExists=!/etc/pigeon/identity/cert.pem
+ConditionPathExists=/etc/pigeon/identity/ca.pem
+ConditionPathExists=/etc/pigeon/enroll.env
+After=network-online.target
+Wants=network-online.target
+Before=pigeon-template.path pigeon-template-reconcile.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+EnvironmentFile=/etc/pigeon/enroll.env
+Environment=ENROLL_CACERT=/etc/pigeon/identity/ca.pem
+Environment=ENROLL_IDENTITY_DIR=/etc/pigeon/identity
+ExecStart=/opt/pigeon/bin/pigeon-enroll register -identity=worker -subject=%H
+NoNewPrivileges=yes
+ProtectSystem=full
+ReadWritePaths=/etc/pigeon/identity/
+ProtectHome=yes
+PrivateTmp=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+LimitCORE=0
+
+[Install]
+WantedBy=multi-user.target

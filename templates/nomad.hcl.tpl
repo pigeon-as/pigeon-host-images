@@ -1,5 +1,6 @@
 datacenter = "${file.enroll.vars.datacenter}"
 region     = "${file.enroll.vars.region}"
+data_dir   = "/opt/nomad/data"
 
 client {
   enabled = true
@@ -23,7 +24,7 @@ addresses {
 servers = ["servers.${file.enroll.vars.datacenter}.${file.enroll.vars.domain}"]
 
 consul {
-  address = "127.0.0.1:8500"
+  address = "unix:///run/consul/consul.sock"
   token   = "${file.enroll.secrets.consul_agent_token}"
   service_identity {
     aud = ["consul.io"]
@@ -51,4 +52,12 @@ vault {
 
 acl {
   enabled = true
+}
+
+telemetry {
+  collection_interval        = "1s"
+  disable_hostname           = true
+  prometheus_metrics          = true
+  publish_allocation_metrics = true
+  publish_node_metrics       = true
 }

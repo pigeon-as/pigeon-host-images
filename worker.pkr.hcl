@@ -122,7 +122,7 @@ build {
   }
 
   provisioner "file" {
-    source      = "templates/mesh.json.tpl"
+    source      = "templates/mesh-worker.json.tpl"
     destination = "/etc/pigeon/mesh.json.tpl"
   }
 
@@ -137,18 +137,43 @@ build {
   }
 
   provisioner "file" {
-    source      = "templates/bootstrap-worker.tmpl.hcl"
-    destination = "/etc/pigeon/bootstrap.tmpl.hcl"
+    source      = "templates/reconcile-worker.hcl"
+    destination = "/etc/pigeon/reconcile.hcl"
   }
 
   provisioner "file" {
-    source      = "templates/reconcile-worker.tmpl.hcl"
-    destination = "/etc/pigeon/reconcile.tmpl.hcl"
-  }
-
-  provisioner "file" {
-    source      = "templates/pigeon-template-reconcile.service"
+    source      = "templates/pigeon-template-reconcile-worker.service"
     destination = "/etc/systemd/system/pigeon-template-reconcile.service"
+  }
+
+  provisioner "file" {
+    source      = "templates/pigeon-template.path"
+    destination = "/etc/systemd/system/pigeon-template.path"
+  }
+
+  provisioner "file" {
+    source      = "templates/pigeon-identity-ensure-worker.service"
+    destination = "/etc/systemd/system/pigeon-identity-ensure.service"
+  }
+
+  provisioner "file" {
+    source      = "templates/pigeon-fence.path"
+    destination = "/etc/systemd/system/pigeon-fence.path"
+  }
+
+  provisioner "file" {
+    source      = "templates/vault-agent.path"
+    destination = "/etc/systemd/system/vault-agent.path"
+  }
+
+  provisioner "file" {
+    source      = "scripts/luks-recovery"
+    destination = "/usr/local/bin/luks-recovery"
+  }
+
+  provisioner "file" {
+    source      = "templates/luks-recovery-worker.service"
+    destination = "/etc/systemd/system/luks-recovery.service"
   }
 
   provisioner "file" {
@@ -164,6 +189,36 @@ build {
   provisioner "file" {
     source      = "templates/nomad-key.ctmpl"
     destination = "/etc/pigeon/nomad-key.ctmpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/nomad-ca.ctmpl"
+    destination = "/etc/pigeon/nomad-ca.ctmpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/mesh-cert.ctmpl"
+    destination = "/etc/pigeon/mesh-cert.ctmpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/mesh-key.ctmpl"
+    destination = "/etc/pigeon/mesh-key.ctmpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/mesh-ca.ctmpl"
+    destination = "/etc/pigeon/mesh-ca.ctmpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/auth-cert.ctmpl"
+    destination = "/etc/pigeon/auth-cert.ctmpl"
+  }
+
+  provisioner "file" {
+    source      = "templates/auth-key.ctmpl"
+    destination = "/etc/pigeon/auth-key.ctmpl"
   }
 
   provisioner "file" {
@@ -232,12 +287,8 @@ build {
   }
 
   provisioner "file" {
-    source      = "scripts/setup-lvm-pool.sh"
-    destination = "/usr/local/bin/setup-lvm-pool.sh"
-  }
-
-  provisioner "shell" {
-    inline = ["chmod 0755 /usr/local/bin/setup-lvm-pool.sh"]
+    source      = "scripts/setup-lvm-pool"
+    destination = "/usr/local/bin/setup-lvm-pool"
   }
 
   provisioner "file" {
@@ -267,6 +318,14 @@ build {
     ]
   }
 
+  # File provisioner doesn't preserve +x when the build host has git
+  # core.fileMode=false (Windows default); chmod explicitly.
+  provisioner "shell" {
+    inline = [
+      "chmod 0755 /usr/local/bin/luks-recovery /usr/local/bin/setup-lvm-pool",
+    ]
+  }
+
   provisioner "shell" {
     inline = [
       "systemctl disable vault",
@@ -276,7 +335,12 @@ build {
       "systemctl enable setup-lvm-pool",
       "systemctl enable pigeon-mesh",
       "systemctl enable pigeon-fence",
+      "systemctl enable pigeon-template.path",
       "systemctl enable pigeon-template-reconcile",
+      "systemctl enable pigeon-identity-ensure",
+      "systemctl enable pigeon-fence.path",
+      "systemctl enable vault-agent.path",
+      "systemctl enable luks-recovery",
       "systemctl enable unbound",
       "systemctl enable systemd-bless-boot",
       "systemctl enable consul",

@@ -1,0 +1,4 @@
+{{ $cn := printf "common_name=%s" (env "HOSTNAME") -}}
+{{ with pkiCert "pki_mesh/issue/mesh-client" $cn "ttl=24h" "alt_names=mesh.pigeon.internal" -}}
+{{ .Key }}
+{{- end }}
