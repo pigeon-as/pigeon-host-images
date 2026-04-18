@@ -12,6 +12,36 @@ source "exec" "refresh_enroll_json" {
   interval = "1h"
 }
 
+# Seal the gossip key to the host's TPM for pigeon-mesh's LoadCredentialEncrypted.
+# Same pattern as control-plane reconcile-server.hcl: plaintext never lands on
+# disk; systemctl start is a no-op post-first-boot.
+source "exec" "seal_gossip_key" {
+  command  = <<-EOT
+    set -euo pipefail
+    mkdir -p /etc/credstore.encrypted
+    pigeon-enroll read secret/gossip_key \
+      | systemd-creds encrypt --with-key=tpm2 --name=gossip-key - /etc/credstore.encrypted/pigeon-mesh.gossip-key
+    systemctl start pigeon-mesh
+  EOT
+  interval = "6h"
+}
+
+# Seal the WireGuard private key to the host's TPM. Seal-once semantics:
+# regenerating would rotate the node's mesh identity and invalidate peers'
+# AllowedIPs. The if-missing guard makes the exec idempotent.
+source "exec" "seal_wg_key" {
+  command  = <<-EOT
+    set -euo pipefail
+    mkdir -p /etc/credstore.encrypted
+    if [ ! -f /etc/credstore.encrypted/pigeon-mesh.wg-key ]; then
+      pigeon-mesh generate-wg-key \
+        | systemd-creds encrypt --with-key=tpm2 --name=wg-key - /etc/credstore.encrypted/pigeon-mesh.wg-key
+    fi
+    systemctl start pigeon-mesh
+  EOT
+  interval = "6h"
+}
+
 # Stage-0 leaf issuance. Idempotent via -renew-before=1h: no-op when cert is
 # valid for >1h. Heals deletion within 30s. Post-handover vault-agent owns
 # these paths.
