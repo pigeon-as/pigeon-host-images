@@ -33,6 +33,23 @@ source "exec" "seal_gossip_key" {
   interval = "6h"
 }
 
+# Seal the WireGuard private key to the host's TPM. Unlike the gossip key,
+# this is the node's permanent mesh identity — seal once and never rotate:
+# the public key is announced in Serf tags and used by peers' AllowedIPs, so
+# replacing it would orphan the node until every peer re-reconciled.
+source "exec" "seal_wg_key" {
+  command  = <<-EOT
+    set -euo pipefail
+    mkdir -p /etc/credstore.encrypted
+    if [ ! -f /etc/credstore.encrypted/pigeon-mesh.wg-key ]; then
+      pigeon-mesh generate-wg-key \
+        | systemd-creds encrypt --with-key=tpm2 --name=wg-key - /etc/credstore.encrypted/pigeon-mesh.wg-key
+    fi
+    systemctl start pigeon-mesh
+  EOT
+  interval = "6h"
+}
+
 # Keep enroll.json fresh: if it's deleted or the server rotates vars/secrets,
 # the next tick writes a new bundle and downstream templates re-render.
 source "exec" "refresh_enroll_json" {
