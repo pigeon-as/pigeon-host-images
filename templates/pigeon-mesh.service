@@ -7,6 +7,7 @@ ConditionPathExists=/etc/credstore.encrypted/pigeon-mesh.gossip-key
 ConditionPathExists=/etc/credstore.encrypted/pigeon-mesh.wg-key
 
 [Service]
+Type=notify
 ExecStart=/opt/pigeon/bin/pigeon-mesh \
   --config=/etc/pigeon/mesh.json \
   --gossip-key-path=%d/gossip-key \
@@ -15,6 +16,7 @@ LoadCredentialEncrypted=gossip-key:/etc/credstore.encrypted/pigeon-mesh.gossip-k
 LoadCredentialEncrypted=wg-key:/etc/credstore.encrypted/pigeon-mesh.wg-key
 Restart=on-failure
 RestartSec=5
+WatchdogSec=30s
 
 NoNewPrivileges=yes
 ProtectSystem=strict

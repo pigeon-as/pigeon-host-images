@@ -7,11 +7,13 @@ ConditionPathExists=/etc/credstore.encrypted/pigeon-enroll.enrollment-key
 ConditionPathExists=/etc/pigeon/enroll-server.hcl
 
 [Service]
+Type=notify
 ExecStart=/opt/pigeon/bin/pigeon-enroll server -config=/etc/pigeon/enroll-server.hcl -key-path=%d/enrollment-key
 LoadCredentialEncrypted=enrollment-key:/etc/credstore.encrypted/pigeon-enroll.enrollment-key
 ExecStartPost=+/usr/bin/systemctl disable --now ssh.service
 Restart=on-failure
 RestartSec=5
+WatchdogSec=30s
 StateDirectory=pigeon-enroll
 NoNewPrivileges=yes
 ProtectSystem=strict
