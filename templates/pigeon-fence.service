@@ -5,9 +5,11 @@ Wants=network-online.target
 ConditionPathExists=/var/lib/pigeon/enroll.json
 
 [Service]
+Type=notify
 ExecStart=/opt/pigeon/bin/pigeon-fence --config=/etc/pigeon/fence.hcl
 Restart=on-failure
 RestartSec=5
+WatchdogSec=30s
 
 AmbientCapabilities=CAP_NET_ADMIN
 CapabilityBoundingSet=CAP_NET_ADMIN
